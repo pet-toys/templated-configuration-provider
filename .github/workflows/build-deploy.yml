@@ -20,7 +20,7 @@ env:
 
 jobs:
   test:
-    name: Test
+    name: test
     uses: pet-toys/templated-configuration-provider/.github/workflows/test.yml@main
  
   build:
@@ -148,4 +148,4 @@ jobs:
     - name: Push to nuget.org
       working-directory: ${{ env.PackagesSubfolder }}
       run: |
-        nuget push "*.nupkg" -ApiKey ${{ secrets.NUGET_API_KEY }} -SkipDuplicate -Source ${{ env.GitHubPackageSource }}
+        nuget push "*.nupkg" -ApiKey ${{ secrets.NUGET_API_KEY }} -SkipDuplicate -Source ${{ env.NuGetOrgPackageSource }}

@@ -13,7 +13,7 @@ New values are computed according to the template (if defined).
 ### Template examples
 
 Configuration:
-```json
+```yaml
 {
   "ConnectionStrings": {
     "DbConnection1": "Host=localhost;Password={ConnectionStrings:DbConnection:Password};",
@@ -24,7 +24,7 @@ Configuration:
 ```
 
 Result:
-```json
+```yaml
 {
   "ConnectionStrings": {
     "DbConnection1": "Host=localhost;Password=Pa$Sw0{rD;",
