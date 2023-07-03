@@ -27,17 +27,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{C962
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{094EB7DD-6517-49BE-9B9C-2CF7A1E4BB22}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\build.yml = .github\workflows\build.yml
+		.github\workflows\build-deploy.yml = .github\workflows\build-deploy.yml
 		.github\workflows\test.yml = .github\workflows\test.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FB80F5DB-87FF-4AA8-B991-E19305BC3C40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetToys.TemplatedConfigurationProvider", "src\PetToys.TemplatedConfigurationProvider\PetToys.TemplatedConfigurationProvider.csproj", "{DB5F2F67-DAE3-4E68-B4EF-E5C5A769995C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetToys.TemplatedConfigurationProvider", "src\PetToys.TemplatedConfigurationProvider\PetToys.TemplatedConfigurationProvider.csproj", "{DB5F2F67-DAE3-4E68-B4EF-E5C5A769995C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F04A8A0C-EE62-4D16-AEED-292A9117D4BA}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F04A8A0C-EE62-4D16-AEED-292A9117D4BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetToys.TemplatedConfigurationProvider.Tests", "tests\PetToys.TemplatedConfigurationProvider.Tests\PetToys.TemplatedConfigurationProvider.Tests.csproj", "{F28CD140-B362-4BF5-92C2-C928B8215AD4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetToys.TemplatedConfigurationProvider.Tests", "test\PetToys.TemplatedConfigurationProvider.Tests\PetToys.TemplatedConfigurationProvider.Tests.csproj", "{F28CD140-B362-4BF5-92C2-C928B8215AD4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEMPLATE", "{258B5E03-3E79-46DE-9C24-C47E5C6D844C}"
+	ProjectSection(SolutionItems) = preProject
+		.github\ISSUE_TEMPLATE\bug_report.md = .github\ISSUE_TEMPLATE\bug_report.md
+		.github\ISSUE_TEMPLATE\feature_request.md = .github\ISSUE_TEMPLATE\feature_request.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +69,7 @@ Global
 		{094EB7DD-6517-49BE-9B9C-2CF7A1E4BB22} = {C962C34A-9839-4369-9518-1168B4503A90}
 		{DB5F2F67-DAE3-4E68-B4EF-E5C5A769995C} = {FB80F5DB-87FF-4AA8-B991-E19305BC3C40}
 		{F28CD140-B362-4BF5-92C2-C928B8215AD4} = {F04A8A0C-EE62-4D16-AEED-292A9117D4BA}
+		{258B5E03-3E79-46DE-9C24-C47E5C6D844C} = {C962C34A-9839-4369-9518-1168B4503A90}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8F58AF91-B0DF-4995-B8D3-FB42C52184DD}
