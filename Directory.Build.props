@@ -23,7 +23,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/pet-toys/templated-configuration-provider.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/pet-toys/templated-configuration-provider</PackageProjectUrl>
-    <PackageTags>configuration;provider;transform;templated</PackageTags>
+    <PackageTags>configuration;providers;transformation;templated</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
