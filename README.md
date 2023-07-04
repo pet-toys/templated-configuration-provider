@@ -1,4 +1,6 @@
-# Templated configuration provider [![test][test-badge]][test-url]
+# Templated configuration provider
+
+[![Unit Test][test-badge]][test-url] [![NuGet Version][nuget-v-badge]][nuget-url] [![NuGet Downloads][nuget-dt-badge]][nuget-url]
 
 ### Features
 
@@ -73,6 +75,8 @@ using PetToys.TemplatedConfigurationProvider;
 
 Provided under the [Apache License, Version 2.0](http://apache.org/licenses/LICENSE-2.0.html).
 
-[shields-io]: https://shields.io
+[nuget-v-badge]: https://img.shields.io/nuget/v/PetToys.TemplatedConfigurationProvider.svg
+[nuget-dt-badge]: https://img.shields.io/nuget/dt/PetToys.TemplatedConfigurationProvider.svg
+[nuget-url]: https://www.nuget.org/packages/PetToys.TemplatedConfigurationProvider/
 [test-badge]: https://github.com/pet-toys/templated-configuration-provider/actions/workflows/test.yml/badge.svg?branch=dev&event=push
-[test-url]: https://github.com/pet-toys/templated-configuration-provider/actions/workflows/test.yml
+[test-url]: https://github.com/pet-toys/templated-configuration-provider/actions?query=workflow%3Atest+branch%3Adev+event%3Apush
