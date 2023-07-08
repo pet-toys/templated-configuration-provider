@@ -8,24 +8,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		.globalconfig = .globalconfig
-		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		global.json = global.json
 		LICENSE = LICENSE
 		NuGet.Config = NuGet.Config
 		README.md = README.md
-		RELEASE-NOTES.txt = RELEASE-NOTES.txt
-		SECURITY.md = SECURITY.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{64CE2C8C-3AD7-495C-82A4-B8E9050CE046}"
 	ProjectSection(SolutionItems) = preProject
 		assets\icon.png = assets\icon.png
 		assets\key.snk = assets\key.snk
+		assets\RELEASE-NOTES.txt = assets\RELEASE-NOTES.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{C962C34A-9839-4369-9518-1168B4503A90}"
+	ProjectSection(SolutionItems) = preProject
+		.github\PULL_REQUEST_TEMPLATE.md = .github\PULL_REQUEST_TEMPLATE.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{094EB7DD-6517-49BE-9B9C-2CF7A1E4BB22}"
 	ProjectSection(SolutionItems) = preProject
@@ -45,6 +46,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEM
 	ProjectSection(SolutionItems) = preProject
 		.github\ISSUE_TEMPLATE\bug_report.md = .github\ISSUE_TEMPLATE\bug_report.md
 		.github\ISSUE_TEMPLATE\feature_request.md = .github\ISSUE_TEMPLATE\feature_request.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{6F5A6A81-94F1-4E50-B02E-044E68D60E77}"
+	ProjectSection(SolutionItems) = preProject
+		docs\CODE_OF_CONDUCT.md = docs\CODE_OF_CONDUCT.md
+		docs\CONTRIBUTING.md = docs\CONTRIBUTING.md
+		docs\SECURITY.md = docs\SECURITY.md
 	EndProjectSection
 EndProject
 Global
@@ -72,6 +80,7 @@ Global
 		{DB5F2F67-DAE3-4E68-B4EF-E5C5A769995C} = {FB80F5DB-87FF-4AA8-B991-E19305BC3C40}
 		{F28CD140-B362-4BF5-92C2-C928B8215AD4} = {F04A8A0C-EE62-4D16-AEED-292A9117D4BA}
 		{258B5E03-3E79-46DE-9C24-C47E5C6D844C} = {C962C34A-9839-4369-9518-1168B4503A90}
+		{6F5A6A81-94F1-4E50-B02E-044E68D60E77} = {004353C3-7916-410E-8CDF-E9685DA2A879}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8F58AF91-B0DF-4995-B8D3-FB42C52184DD}

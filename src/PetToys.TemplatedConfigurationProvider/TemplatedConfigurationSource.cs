@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿#nullable enable
+
+using Microsoft.Extensions.Configuration;
 
 namespace PetToys.TemplatedConfigurationProvider
 {

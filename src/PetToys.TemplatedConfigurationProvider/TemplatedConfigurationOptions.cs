@@ -1,4 +1,6 @@
-﻿namespace PetToys.TemplatedConfigurationProvider
+﻿#nullable enable
+
+namespace PetToys.TemplatedConfigurationProvider
 {
     public sealed class TemplatedConfigurationOptions
     {

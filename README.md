@@ -10,7 +10,7 @@ New values are computed according to the template (if defined).
 
 - Absolute references to values are supported.
 - Relative links from the same or parent sections are supported.
-- Configuration reload supported (`IOptionMonitor<>`).
+- Configuration reload are supported (`IOptionMonitor<>`).
 
 ### Template examples
 
@@ -36,7 +36,7 @@ Result:
 }
 ```
 
-More examples in [unit tests](https://github.com/pet-toys/templated-configuration-provider/blob/main/test/PetToys.TemplatedConfigurationProvider.Tests/TemplatedConfigurationProviderTests.cs).
+More examples in [unit tests](https://github.com/pet-toys/templated-configuration-provider/blob/dev/test/PetToys.TemplatedConfigurationProvider.Tests/TemplatedConfigurationProviderTests.cs).
 
 ### Getting started
 

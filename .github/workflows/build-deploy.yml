@@ -21,7 +21,7 @@ env:
 jobs:
   test:
     name: test
-    uses: pet-toys/templated-configuration-provider/.github/workflows/test.yml@main
+    uses: pet-toys/templated-configuration-provider/.github/workflows/test.yml@dev
  
   build:
     needs: test
@@ -42,7 +42,7 @@ jobs:
       run: echo "PACKAGE_VERSION=$(echo ${{ github.event.release.tag_name }} | cut -c 2-)" >> $GITHUB_ENV
 
     - name: Release notes
-      run: echo "${{ github.event.release.body }}" > RELEASE-NOTES.txt
+      run: echo "${{ github.event.release.body }}" > assets/RELEASE-NOTES.txt
 
     - name: Restore
       run: dotnet restore ${{ env.ProjectsToPack }}
