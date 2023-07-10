@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace PetToys.TemplatedConfigurationProvider
 {
-    public sealed class TemplatedConfigurationSource : IConfigurationSource
+    internal sealed class TemplatedConfigurationSource : IConfigurationSource
     {
         private readonly TemplatedConfigurationOptions _options;
 

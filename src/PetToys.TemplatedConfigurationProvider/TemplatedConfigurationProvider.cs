@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace PetToys.TemplatedConfigurationProvider
 {
-    public sealed class TemplatedConfigurationProvider : ConfigurationProvider
+    internal sealed class TemplatedConfigurationProvider : ConfigurationProvider
     {
         private readonly char _startChar;
         private readonly char _endChar;

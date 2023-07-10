@@ -44,4 +44,8 @@
     </PropertyGroup>
   </Target>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="PetToys.TemplatedConfigurationProvider.Tests" />
+  </ItemGroup>
+
 </Project>
