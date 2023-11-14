@@ -13,7 +13,7 @@ namespace PetToys.TemplatedConfigurationProvider
         private readonly char _endChar;
         private readonly IConfigurationRoot _configurationRoot;
 
-        private IDictionary<string, string?> _otherProvidersData = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, string?> _otherProvidersData = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
 
         public TemplatedConfigurationProvider(
             TemplatedConfigurationOptions options,
