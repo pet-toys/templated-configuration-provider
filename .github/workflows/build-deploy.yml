@@ -12,7 +12,6 @@ env:
   PackagesSubfolder: "nuget"
   ArtifactName: packages
   ValidatorVersion: "0.0.1-preview.304"
-  NuGetVersion: "6.6.1"
   GitHubPackageSource: "https://nuget.pkg.github.com/pet-toys/index.json"
   NuGetOrgPackageSource: "https://api.nuget.org/v3/index.json"
   DevRepositoryUrl: "https://github.com/pet-toys/templated-configuration-provider/pkgs/nuget/PetToys.TemplatedConfigurationProvider"
@@ -117,7 +116,7 @@ jobs:
     - name: Setup NuGet
       uses: nuget/setup-nuget@v1
       with:
-        nuget-version: ${{ env.NuGetVersion }}
+        nuget-version: 'latest'
 
     - name: Push to github
       working-directory: ${{ env.PackagesSubfolder }}
@@ -143,7 +142,7 @@ jobs:
     - name: Setup NuGet
       uses: nuget/setup-nuget@v1
       with:
-        nuget-version: ${{ env.NuGetVersion }}
+        nuget-version: 'latest'
 
     - name: Push to nuget.org
       working-directory: ${{ env.PackagesSubfolder }}

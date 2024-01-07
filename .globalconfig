@@ -18,6 +18,9 @@ dotnet_diagnostic.IDE0079.severity = warning
 # IDE0130: Namespace does not match folder structure
 dotnet_diagnostic.IDE0130.severity = warning
 
+# IDE0301: Simplify collection initialization
+dotnet_style_prefer_collection_expression = false
+
 # SA1309: Field names should not begin with underscore
 dotnet_diagnostic.SA1309.severity = none
 
