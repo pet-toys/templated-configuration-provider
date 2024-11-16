@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +11,7 @@ namespace PetToys.TemplatedConfigurationProvider
         private readonly char _endChar;
         private readonly IConfigurationRoot _configurationRoot;
 
-        private Dictionary<string, string?> _otherProvidersData = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, string?> _otherProvidersData = new(StringComparer.OrdinalIgnoreCase);
 
         public TemplatedConfigurationProvider(
             TemplatedConfigurationOptions options,

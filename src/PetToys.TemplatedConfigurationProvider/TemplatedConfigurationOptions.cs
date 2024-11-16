@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-namespace PetToys.TemplatedConfigurationProvider
+﻿namespace PetToys.TemplatedConfigurationProvider
 {
     /// <summary>
     /// Options to configure TemplatedConfigurationProvider.

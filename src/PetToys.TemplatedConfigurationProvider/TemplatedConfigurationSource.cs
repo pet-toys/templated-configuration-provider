@@ -1,19 +1,14 @@
-﻿#nullable enable
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace PetToys.TemplatedConfigurationProvider
 {
-    internal sealed class TemplatedConfigurationSource : IConfigurationSource
+    internal sealed class TemplatedConfigurationSource(
+        TemplatedConfigurationOptions options)
+        : IConfigurationSource
     {
-        private readonly TemplatedConfigurationOptions _options;
-
-        public TemplatedConfigurationSource(TemplatedConfigurationOptions options)
+        public IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            _options = options;
+            return new TemplatedConfigurationProvider(options, builder);
         }
-
-        public IConfigurationProvider Build(IConfigurationBuilder builder) =>
-            new TemplatedConfigurationProvider(_options, builder);
     }
 }
