@@ -1,14 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace PetToys.TemplatedConfigurationProvider
+namespace PetToys.TemplatedConfigurationProvider;
+
+internal sealed class TemplatedConfigurationSource(
+    TemplatedConfigurationOptions options)
+    : IConfigurationSource
 {
-    internal sealed class TemplatedConfigurationSource(
-        TemplatedConfigurationOptions options)
-        : IConfigurationSource
+    public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
-        public IConfigurationProvider Build(IConfigurationBuilder builder)
-        {
-            return new TemplatedConfigurationProvider(options, builder);
-        }
+        return new TemplatedConfigurationProvider(options, builder);
     }
 }

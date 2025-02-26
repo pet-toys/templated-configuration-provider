@@ -12,6 +12,8 @@
     <AnalysisLevel>9.0-Recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
@@ -26,7 +28,7 @@
     <PackageProjectUrl>https://github.com/pet-toys/templated-configuration-provider</PackageProjectUrl>
     <PackageTags>configuration;providers;transformation;templated</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
