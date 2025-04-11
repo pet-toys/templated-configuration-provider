@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Packages.props = Directory.Packages.props
 		global.json = global.json
 		LICENSE = LICENSE
-		NuGet.Config = NuGet.Config
+		nuget.config = nuget.config
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -35,9 +35,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FB80F5DB-87FF-4AA8-B991-E19305BC3C40}"
-	ProjectSection(SolutionItems) = preProject
-		src\Directory.Packages.props = src\Directory.Packages.props
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetToys.TemplatedConfigurationProvider", "src\PetToys.TemplatedConfigurationProvider\PetToys.TemplatedConfigurationProvider.csproj", "{DB5F2F67-DAE3-4E68-B4EF-E5C5A769995C}"
 EndProject

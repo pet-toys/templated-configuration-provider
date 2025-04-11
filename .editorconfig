@@ -4,11 +4,12 @@ root = true
 [*]
 indent_style = space
 
-[*.cs]
+# Code files
+[*.{cs,vb}]
 csharp_style_namespace_declarations = file_scoped
 
 # Xml files
-[*.{xml,csproj,Build.props,Packages.props}]
+[*.{xml,csproj,Build.props,Packages.props,config}]
 indent_size = 2
 
 # Json files

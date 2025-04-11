@@ -75,8 +75,8 @@ using PetToys.TemplatedConfigurationProvider;
 
 Provided under the [Apache License, Version 2.0](http://apache.org/licenses/LICENSE-2.0.html).
 
-[nuget-v-badge]: https://img.shields.io/nuget/v/PetToys.TemplatedConfigurationProvider.svg
-[nuget-dt-badge]: https://img.shields.io/nuget/dt/PetToys.TemplatedConfigurationProvider.svg
+[nuget-v-badge]: https://img.shields.io/nuget/v/PetToys.TemplatedConfigurationProvider?style=flat-square&logo=nuget&label=version
+[nuget-dt-badge]: https://img.shields.io/nuget/dt/PetToys.TemplatedConfigurationProvider?style=flat-square&logo=nuget
 [nuget-url]: https://www.nuget.org/packages/PetToys.TemplatedConfigurationProvider/
-[test-badge]: https://github.com/pet-toys/templated-configuration-provider/actions/workflows/test.yml/badge.svg?branch=dev
+[test-badge]: https://img.shields.io/github/actions/workflow/status/pet-toys/templated-configuration-provider/test.yml?branch=dev&style=flat-square&logo=github&label=test
 [test-url]: https://github.com/pet-toys/templated-configuration-provider/actions?query=workflow%3Atest+branch%3Adev
