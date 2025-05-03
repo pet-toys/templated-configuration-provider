@@ -77,7 +77,7 @@ internal sealed class TemplatedConfigurationProvider : ConfigurationProvider
         var segments = new List<string> { string.Empty };
         foreach (var fragment in originalKey.Split(ConfigurationPath.KeyDelimiter))
         {
-            segments.Add(segments.Last() + fragment + ConfigurationPath.KeyDelimiter);
+            segments.Add(segments[^1] + fragment + ConfigurationPath.KeyDelimiter);
         }
 
         foreach (var segment in segments)
