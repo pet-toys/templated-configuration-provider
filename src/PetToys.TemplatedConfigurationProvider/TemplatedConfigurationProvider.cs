@@ -1,57 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 
 namespace PetToys.TemplatedConfigurationProvider;
 
-internal sealed class TemplatedConfigurationProvider : ConfigurationProvider
+internal sealed class TemplatedConfigurationProvider
+    : ConfigurationProvider, IDisposable
 {
     private readonly char _startChar;
     private readonly char _endChar;
-    private readonly IConfigurationRoot _configurationRoot;
+    private readonly ConfigurationRoot _root;
+    private readonly IDisposable _changeTokenRegistration;
 
-    private Dictionary<string, string?> _otherProvidersData = new(StringComparer.OrdinalIgnoreCase);
-
-    public TemplatedConfigurationProvider(
-        TemplatedConfigurationOptions options,
-        IConfigurationBuilder builder)
+    public TemplatedConfigurationProvider(TemplatedConfigurationOptions options, IConfigurationBuilder builder)
     {
         _startChar = options.TemplateCharacterStart;
         _endChar = options.TemplateCharacterEnd;
-
-        var providers = builder.Sources
+        var otherProviders = builder.Sources
             .Where(s => s.GetType() != typeof(TemplatedConfigurationSource))
             .Select(source => source.Build(builder))
             .ToList();
-        _configurationRoot = new ConfigurationRoot(providers);
+        _root = new ConfigurationRoot(otherProviders);
+        _changeTokenRegistration = ChangeToken.OnChange(_root.GetReloadToken, Reload);
     }
 
     public override void Load()
     {
-        Data.Clear();
-        _otherProvidersData = new Dictionary<string, string?>(_configurationRoot.AsEnumerable(), StringComparer.OrdinalIgnoreCase);
-
-        foreach (var kv in _otherProvidersData.Where(kv => kv.Value is not null))
+        foreach (var (key, value) in GetInnerData())
         {
-            if (FoundReplacement(kv.Key, kv.Value!, out var replacement))
+            Data[key] = value;
+        }
+    }
+
+    private void Reload()
+    {
+        var changed = false;
+        var ownData = new Dictionary<string, string?>(GetInnerData(), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (key, oldValue) in Data)
+        {
+            if (ownData.TryGetValue(key, out var value))
             {
-                Data[kv.Key] = replacement;
+                if (value == oldValue) continue;
+                Data[key] = value;
+                changed = true;
+                continue;
+            }
+
+            Data.Remove(key);
+            changed = true;
+        }
+
+        if (changed) OnReload();
+    }
+
+    private IEnumerable<KeyValuePair<string, string?>> GetInnerData()
+    {
+        var otherData = new Dictionary<string, string?>(
+            _root.AsEnumerable(),
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (key, value) in otherData.Where(kv => kv.Value is not null))
+        {
+            if (FoundReplacement(otherData, key, value!, out var replacement))
+            {
+                yield return new KeyValuePair<string, string?>(key, replacement);
             }
         }
     }
 
-    private static IEnumerable<int> AllIndexesOf(char symbol, string value)
+    private bool FoundReplacement(IDictionary<string, string?> data, string originalKey, string value, [MaybeNullWhen(false)] out string replacement)
     {
-        for (var i = 0; i < value.Length; i++)
-        {
-            if (value[i] == symbol) yield return i;
-        }
-    }
-
-    private bool FoundReplacement(string originalKey, string value, out string replacement)
-    {
-        replacement = string.Empty;
+        replacement = null;
         var startIndexes = AllIndexesOf(_startChar, value).Reverse().ToArray();
         var endIndexes = AllIndexesOf(_endChar, value).ToArray();
         if (startIndexes.Length == 0 || endIndexes.Length == 0) return false;
@@ -60,7 +83,7 @@ internal sealed class TemplatedConfigurationProvider : ConfigurationProvider
         {
             foreach (var endIndex in endIndexes.Where(i => i > startIndex))
             {
-                if (!FoundValue(originalKey, value[(startIndex + 1)..endIndex], out var newValue))
+                if (!FoundValue(data, originalKey, value[(startIndex + 1)..endIndex], out var newValue))
                     continue;
 
                 replacement = value[..startIndex] + newValue + value[(endIndex + 1)..];
@@ -71,7 +94,15 @@ internal sealed class TemplatedConfigurationProvider : ConfigurationProvider
         return false;
     }
 
-    private bool FoundValue(string originalKey, string key, out string? value)
+    private static IEnumerable<int> AllIndexesOf(char symbol, string value)
+    {
+        for (var i = 0; i < value.Length; i++)
+        {
+            if (value[i] == symbol) yield return i;
+        }
+    }
+
+    private static bool FoundValue(IDictionary<string, string?> data, string originalKey, string key, out string? value)
     {
         value = string.Empty;
         var segments = new List<string> { string.Empty };
@@ -82,12 +113,18 @@ internal sealed class TemplatedConfigurationProvider : ConfigurationProvider
 
         foreach (var segment in segments)
         {
-            if (_otherProvidersData.TryGetValue(segment + key, out value))
+            if (data.TryGetValue(segment + key, out value))
             {
                 return true;
             }
         }
 
         return false;
+    }
+
+    public void Dispose()
+    {
+        _root.Dispose();
+        _changeTokenRegistration.Dispose();
     }
 }

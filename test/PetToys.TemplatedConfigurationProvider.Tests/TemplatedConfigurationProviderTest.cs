@@ -8,7 +8,7 @@ using Xunit;
 
 namespace PetToys.TemplatedConfigurationProvider.Tests;
 
-public sealed class TemplatedConfigurationProviderTests
+public sealed class TemplatedConfigurationProviderTest
 {
     private static readonly Dictionary<string, string?> MemoryData = new(StringComparer.OrdinalIgnoreCase)
     {
