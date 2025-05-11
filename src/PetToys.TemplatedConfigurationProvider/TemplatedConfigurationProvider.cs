@@ -39,6 +39,7 @@ internal sealed class TemplatedConfigurationProvider
     {
         var changed = false;
         var ownData = new Dictionary<string, string?>(GetInnerData(), StringComparer.OrdinalIgnoreCase);
+        var deleted = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var (key, oldValue) in Data)
         {
@@ -50,8 +51,13 @@ internal sealed class TemplatedConfigurationProvider
                 continue;
             }
 
-            Data.Remove(key);
+            deleted.Add(key);
             changed = true;
+        }
+
+        foreach (var key in deleted)
+        {
+            Data.Remove(key);
         }
 
         if (changed) OnReload();

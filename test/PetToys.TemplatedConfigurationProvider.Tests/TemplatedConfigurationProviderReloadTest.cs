@@ -17,8 +17,10 @@ public sealed class TemplatedConfigurationProviderReloadTest
     private const string Json1 = """
                                  {
                                    "ConnectionStrings": {
-                                     "DbConnection": "Host=localhost;Password={DbConnection:Password};",
-                                     "DbConnection:Password": "Pa$Sw0{rD"
+                                     "DbConnection1": "Host=localhost;Password={DbConnection1:Password};",
+                                     "DbConnection1:Password": "Pa$Sw0{rD",
+                                     "DbConnection2": "Host=localhost;Password={DbConnection2:Password};",
+                                     "DbConnection2:Password": "$SPaw0{rD"
                                    }
                                  }
                                  """;
@@ -26,8 +28,8 @@ public sealed class TemplatedConfigurationProviderReloadTest
     private const string Json2 = """
                                  {
                                    "ConnectionStrings": {
-                                     "DbConnection": "Host=localhost;Password={DbConnection:Password};",
-                                     "DbConnection:Password": "Pa$S}w0rD"
+                                     "DbConnection1": "Host=localhost;Password={DbConnection1:Password};",
+                                     "DbConnection1:Password": "Pa$S}w0rD"
                                    }
                                  }
                                  """;
@@ -42,17 +44,17 @@ public sealed class TemplatedConfigurationProviderReloadTest
             .AddTemplatedConfiguration()
             .Build();
 
-        var result = configuration.GetConnectionString("DbConnection");
+        var result = configuration.GetConnectionString("DbConnection1");
         result.Should().Be(expected1);
 
         await WriteToTempFileAsync(Json2, fileName);
         await Task.Delay(Timeout);
-        result = configuration.GetConnectionString("DbConnection");
+        result = configuration.GetConnectionString("DbConnection1");
         result.Should().Be(expected2);
 
         await WriteToTempFileAsync(Json1, fileName);
         await Task.Delay(Timeout);
-        result = configuration.GetConnectionString("DbConnection");
+        result = configuration.GetConnectionString("DbConnection1");
         result.Should().Be(expected1);
 
         File.Delete(fileName);
