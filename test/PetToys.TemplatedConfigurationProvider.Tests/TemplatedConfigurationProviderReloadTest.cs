@@ -8,7 +8,7 @@ namespace PetToys.TemplatedConfigurationProvider.Tests;
 
 public sealed class TemplatedConfigurationProviderReloadTest
 {
-#if OS_MAC
+#if OS_MAC || OS_WINDOWS
     private const int Timeout = 7000;
 #else
     private const int Timeout = 700;
@@ -48,12 +48,12 @@ public sealed class TemplatedConfigurationProviderReloadTest
         result.Should().Be(expected1);
 
         await WriteToTempFileAsync(Json2, fileName);
-        await Task.Delay(Timeout);
+        await Task.Delay(Timeout, TestContext.Current.CancellationToken);
         result = configuration.GetConnectionString("DbConnection1");
         result.Should().Be(expected2);
 
         await WriteToTempFileAsync(Json1, fileName);
-        await Task.Delay(Timeout);
+        await Task.Delay(Timeout, TestContext.Current.CancellationToken);
         result = configuration.GetConnectionString("DbConnection1");
         result.Should().Be(expected1);
 
