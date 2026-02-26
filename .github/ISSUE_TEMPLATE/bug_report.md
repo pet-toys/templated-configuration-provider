@@ -11,7 +11,7 @@ assignees: ''
 What's going wrong?
 
 **Reproduction**
-Please provide code samples showing how you're configuring and calling this provider to produce the behavior.
+Please provide code samples showing how you are configuring and using this provider to reproduce the issue.
 
 **Expected behavior**
 A concise description of what you expected to happen.

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 
@@ -71,46 +72,77 @@ internal sealed class TemplatedConfigurationProvider
 
         foreach (var (key, value) in otherData.Where(kv => kv.Value is not null))
         {
-            if (FoundReplacement(otherData, key, value!, out var replacement))
+            if (TryReplace(otherData, key, value!, out var replacement))
             {
                 yield return new KeyValuePair<string, string?>(key, replacement);
             }
         }
     }
 
-    private bool FoundReplacement(IDictionary<string, string?> data, string originalKey, string value, [MaybeNullWhen(false)] out string replacement)
+    private bool TryReplace(IDictionary<string, string?> data, string originalKey, string value, [MaybeNullWhen(false)] out string replacement)
     {
-        replacement = null;
-        var startIndexes = AllIndexesOf(_startChar, value).Reverse().ToArray();
-        var endIndexes = AllIndexesOf(_endChar, value).ToArray();
-        if (startIndexes.Length == 0 || endIndexes.Length == 0) return false;
-
-        foreach (var startIndex in startIndexes)
+        if (!value.Contains(_startChar) || !value.Contains(_endChar))
         {
-            foreach (var endIndex in endIndexes.Where(i => i > startIndex))
-            {
-                if (!FoundValue(data, originalKey, value[(startIndex + 1)..endIndex], out var newValue))
-                    continue;
-
-                replacement = value[..startIndex] + newValue + value[(endIndex + 1)..];
-                return true;
-            }
+            replacement = null;
+            return false;
         }
 
+        var sb = new StringBuilder();
+        var i = 0;
+        var anyReplaced = false;
+
+        while (i < value.Length)
+        {
+            var start = value.IndexOf(_startChar, i);
+            if (start == -1)
+            {
+                sb.Append(value, i, value.Length - i);
+                break;
+            }
+
+            var keyStart = start + 1;
+            var searchFrom = keyStart;
+            var matched = false;
+
+            while (true)
+            {
+                var end = value.IndexOf(_endChar, searchFrom);
+                if (end == -1) break;
+
+                var key = value[keyStart..end];
+                if (TryGetReplacement(data, originalKey, key, out var rep))
+                {
+                    sb.Append(value, i, start - i);
+                    sb.Append(rep);
+                    i = end + 1;
+                    anyReplaced = true;
+                    matched = true;
+                    break;
+                }
+
+                searchFrom = end + 1;
+            }
+
+            if (matched) continue;
+
+            sb.Append(value, i, start - i);
+            sb.Append(_startChar);
+            i = keyStart;
+        }
+
+        if (anyReplaced)
+        {
+            replacement = sb.ToString();
+            return true;
+        }
+
+        replacement = null;
         return false;
     }
 
-    private static IEnumerable<int> AllIndexesOf(char symbol, string value)
+    private static bool TryGetReplacement(IDictionary<string, string?> data, string originalKey, string key, [MaybeNullWhen(false)] out string value)
     {
-        for (var i = 0; i < value.Length; i++)
-        {
-            if (value[i] == symbol) yield return i;
-        }
-    }
-
-    private static bool FoundValue(IDictionary<string, string?> data, string originalKey, string key, out string? value)
-    {
-        value = string.Empty;
+        value = null;
         var segments = new List<string> { string.Empty };
         foreach (var fragment in originalKey.Split(ConfigurationPath.KeyDelimiter))
         {
@@ -119,10 +151,9 @@ internal sealed class TemplatedConfigurationProvider
 
         foreach (var segment in segments)
         {
-            if (data.TryGetValue(segment + key, out value))
-            {
-                return true;
-            }
+            if (!data.TryGetValue(segment + key, out var val)) continue;
+            value = val ?? string.Empty;
+            return true;
         }
 
         return false;
