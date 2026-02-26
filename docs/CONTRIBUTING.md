@@ -3,7 +3,7 @@
 You can contribute to the project by:
 - Report issues and bugs [here](https://github.com/pet-toys/templated-configuration-provider/issues/new?template=bug_report.md).
 - Submit feature requests [here](https://github.com/pet-toys/templated-configuration-provider/issues/new?template=feature_request.md).
-- Creating a pull request.
+- Create a pull request.
 
 ## Code Style
 
@@ -27,14 +27,14 @@ You can contribute to the project by:
 
 8. DO use `_` prefix for private field names.
 
-9. DO use the `I` prefix for Interface names.
+9. DO use the `I` prefix for interface names.
 
 10. DO vertically align curly brackets.
 
-11. DO NOT use `Enum` or `Flag(s)` suffix for Enum names.
+11. DO NOT use `Enum` or `Flag(s)` suffix for enum names.
 
-12. DO use prefix `Is`, `Has`, `Have`, `Any`, `Can` or similar keywords for Boolean names.
+12. DO use the prefix `Is`, `Has`, `Have`, `Any`, `Can` or similar keywords for boolean names.
 
-13. DO use curly brackets for single line `if`, `for` and `foreach` statements.
+13. DO use curly brackets for single-line `if`, `for`, and `foreach` statements.
 
-14. DO use nullable reference type by adding `#nullable enable` at the top of every C# file.
+14. DO use nullable reference types by adding `#nullable enable` at the top of every C# file.

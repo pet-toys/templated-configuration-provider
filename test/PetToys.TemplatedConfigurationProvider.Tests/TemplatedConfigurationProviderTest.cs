@@ -35,6 +35,9 @@ public sealed class TemplatedConfigurationProviderTest
         ["RelativeReference5:OpenIdConnectOptions:Authority"] = "https://login.provider.com/{OpenIdConnectOptions:Authority:TenantId}/v2.0/",
         ["RelativeReference6:OpenIdConnectOptions:Authority:TenantId"] = "F8E5CAF8-325E-4975-8A5A-C0494B5FCACB",
 
+        ["AbsoluteReference3:TwoValues"] = "qwe{Replacements:EmptyValue}asd{Replacements:Value}zxc",
+        ["AbsoluteReference4:TwoValues"] = "qwe|Replacements:EmptyValue|as|d|Replacements:Value|zxc",
+
         ["Replacements:NullValue"] = null,
         ["Replacements:EmptyValue"] = string.Empty,
         ["Replacements:Value"] = "PJVr[6}Zr{yBz}GQ2U6Fj0My",
@@ -95,6 +98,7 @@ public sealed class TemplatedConfigurationProviderTest
     [InlineData("RelativeReference1:OpenIdConnectOptions:Authority", "https://login.provider.com/C5356E88-1573-42B3-AAEE-E325FCA3F5D3/v2.0/")]
     [InlineData("RelativeReference2:OpenIdConnectOptions:Authority", "https://login.provider.com/B1587775-091D-4FBF-9331-7D6D2D0696C0/v2.0/")]
     [InlineData("RelativeReference3:OpenIdConnectOptions:Authority", "https://login.provider.com/CB2681E4-A5CB-4EEE-AD67-8CDCD41046E8/v2.0/")]
+    [InlineData("AbsoluteReference3:TwoValues", "qweasdPJVr[6}Zr{yBz}GQ2U6Fj0Myzxc")]
 
     // edge case (meaningless)
     [InlineData("RelativeReference4:OpenIdConnectOptions:Authority", "https://login.provider.com/https://login.provider.com/{Authority}/v2.0//v2.0/")]
@@ -135,6 +139,7 @@ public sealed class TemplatedConfigurationProviderTest
 
     [Theory]
     [InlineData("Replacements:DifficultSituation5", "{L|(o)re^*mPJVr[6}Zr{yBz}GQ2U6Fj0My gt)({[]][} ipsum dolor sit")]
+    [InlineData("AbsoluteReference4:TwoValues", "qweas|dPJVr[6}Zr{yBz}GQ2U6Fj0Myzxc")]
     public void TemplatedConfiguration_OptionsModificator2(string key, string expected)
     {
         var value = _configurationWithOptionsModificator2.GetValue<string>(key);

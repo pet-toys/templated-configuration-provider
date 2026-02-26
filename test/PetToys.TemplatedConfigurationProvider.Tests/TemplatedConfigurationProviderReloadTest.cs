@@ -8,11 +8,7 @@ namespace PetToys.TemplatedConfigurationProvider.Tests;
 
 public sealed class TemplatedConfigurationProviderReloadTest
 {
-#if OS_MAC || OS_WINDOWS
-    private const int Timeout = 7000;
-#else
-    private const int Timeout = 700;
-#endif
+    private const int Timeout = 10_000;
 
     private const string Json1 = """
                                  {

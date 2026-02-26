@@ -4,18 +4,19 @@
 
 ### Features
 
-This library adds its own ConfigurationProvider to the configuration builder.
+This library adds its own `ConfigurationProvider` to the configuration builder.
 This provider can override values from previously registered providers.
 New values are computed according to the template (if defined).
 
 - Absolute references to values are supported.
-- Relative links from the same or parent sections are supported.
-- Configuration reload are supported (`IOptionMonitor<>`).
+- Relative references from the same or parent sections are supported.
+- Multiple placeholders within a single value are supported.
+- Configuration reloads are supported (`IOptionsMonitor<>`).
 
 ### Template examples
 
 Configuration:
-```yaml
+```json
 {
   "ConnectionStrings": {
     "DbConnection1": "Host=localhost;Password={ConnectionStrings:DbConnection:Password};",
@@ -26,7 +27,7 @@ Configuration:
 ```
 
 Result:
-```yaml
+```json
 {
   "ConnectionStrings": {
     "DbConnection1": "Host=localhost;Password=Pa$Sw0{rD;",
@@ -40,11 +41,11 @@ More examples in [unit tests](https://github.com/pet-toys/templated-configuratio
 
 ### Getting started
 
-- Provider is installed from NuGet. `dotnet add package PetToys.TemplatedConfigurationProvider`
-- Add a using statement to `PetToys.TemplatedConfigurationProvider`
-- Add a provider to the configuration builder, preferably by using the  `AddTemplatedConfiguration()` extension method.
+- Install the provider from NuGet: `dotnet add package PetToys.TemplatedConfigurationProvider`
+- Add a using statement for `PetToys.TemplatedConfigurationProvider`
+- Add the provider to the configuration builder, preferably by using the `AddTemplatedConfiguration()` extension method.
 
-### Examples of using
+### Usage examples
 
 ```csharp
 using PetToys.TemplatedConfigurationProvider;
