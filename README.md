@@ -19,20 +19,23 @@ Configuration:
 ```json
 {
   "ConnectionStrings": {
-    "DbConnection1": "Host=localhost;Password={ConnectionStrings:DbConnection:Password};",
-    "DbConnection2": "Host=localhost;Password={DbConnection:Password};",
-    "DbConnection:Password": "Pa$Sw0{rD"
+    "Postgres": "Host=db;Database=app;Password={SECRET:CONNECTIONSTRINGS:POSTGRES:PASSWORD};",
+    "ClickHouse": "Host=analytics;Database=app;Password={SECRET:CONNECTIONSTRINGS:CLICKHOUSE:PASSWORD};"
   }
 }
+```
+Environment variables:
+```
+SECRET__CONNECTIONSTRINGS__POSTGRES__PASSWORD=Pa$Sw0{rD
+SECRET__CONNECTIONSTRINGS__CLICKHOUSE__PASSWORD=Pa$Sw0{rD
 ```
 
 Result:
 ```json
 {
   "ConnectionStrings": {
-    "DbConnection1": "Host=localhost;Password=Pa$Sw0{rD;",
-    "DbConnection2": "Host=localhost;Password=Pa$Sw0{rD;",
-    "DbConnection:Password": "Pa$Sw0{rD"
+    "Postgres": "Host=db;Database=app;Password=Pg$Secr3t;",
+    "ClickHouse": "Host=analytics;Database=app;Password=Ch$Secr3t;"
   }
 }
 ```

@@ -27,7 +27,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/pet-toys/templated-configuration-provider.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/pet-toys/templated-configuration-provider</PackageProjectUrl>
-    <PackageTags>configuration;providers;transformation;templated</PackageTags>
+    <PackageTags>configuration;providers;transformation;templated;configuration-provider;microsoft-extensions-configuration;aspnetcore;templating;interpolation;placeholder;appsettings;pattern</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
