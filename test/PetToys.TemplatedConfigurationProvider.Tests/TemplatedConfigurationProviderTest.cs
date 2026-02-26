@@ -51,6 +51,8 @@ public sealed class TemplatedConfigurationProviderTest
 
         ["Replacements:DifficultSituation4"] = "|||]]]}]]]]]|||||]]|[[[][][||]Replacements:Value|[]}}}}[{}}}[]}",
         ["Replacements:DifficultSituation5"] = "{L|(o)re^*m|Replacements:Value| gt)({[]][} ipsum dolor sit",
+
+        ["AbsoluteReference5:TwoValues"] = "qwe]Replacements:EmptyValue|asd]Replacements:Value|zxc",
     };
 
     private readonly IConfigurationRoot _configuration = new ConfigurationBuilder()
@@ -131,6 +133,7 @@ public sealed class TemplatedConfigurationProviderTest
 
     [Theory]
     [InlineData("Replacements:DifficultSituation4", "|||]]]}]]]]]|||||]]|[[[][][||PJVr[6}Zr{yBz}GQ2U6Fj0My[]}}}}[{}}}[]}")]
+    [InlineData("AbsoluteReference5:TwoValues", "qweasdPJVr[6}Zr{yBz}GQ2U6Fj0Myzxc")]
     public void TemplatedConfiguration_OptionsModificator1(string key, string expected)
     {
         var value = _configurationWithOptionsModificator1.GetValue<string>(key);
