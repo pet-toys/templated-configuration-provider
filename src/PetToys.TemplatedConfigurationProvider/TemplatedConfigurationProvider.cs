@@ -87,16 +87,17 @@ internal sealed class TemplatedConfigurationProvider
             return false;
         }
 
-        var sb = new StringBuilder();
+        StringBuilder? sb = null;
+        var pendingStart = 0;
         var i = 0;
-        var anyReplaced = false;
 
         while (i < value.Length)
         {
             var start = value.IndexOf(_startChar, i);
             if (start == -1)
             {
-                sb.Append(value, i, value.Length - i);
+                if (sb != null)
+                    sb.Append(value, pendingStart, value.Length - pendingStart);
                 break;
             }
 
@@ -112,10 +113,11 @@ internal sealed class TemplatedConfigurationProvider
                 var key = value[keyStart..end];
                 if (TryGetReplacement(data, originalKey, key, out var rep))
                 {
-                    sb.Append(value, i, start - i);
+                    sb ??= new StringBuilder(value.Length);
+                    sb.Append(value, pendingStart, start - pendingStart);
                     sb.Append(rep);
+                    pendingStart = end + 1;
                     i = end + 1;
-                    anyReplaced = true;
                     matched = true;
                     break;
                 }
@@ -125,12 +127,10 @@ internal sealed class TemplatedConfigurationProvider
 
             if (matched) continue;
 
-            sb.Append(value, i, start - i);
-            sb.Append(_startChar);
             i = keyStart;
         }
 
-        if (anyReplaced)
+        if (sb != null)
         {
             replacement = sb.ToString();
             return true;
