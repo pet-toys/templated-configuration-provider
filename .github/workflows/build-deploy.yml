@@ -16,6 +16,13 @@ env:
   DevRepositoryUrl: "https://github.com/pet-toys/templated-configuration-provider/pkgs/nuget/PetToys.TemplatedConfigurationProvider"
   ProdRepositoryUrl: "https://www.nuget.org/packages/PetToys.TemplatedConfigurationProvider"
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
 jobs:
   test:
     name: test
@@ -29,18 +36,22 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
       with:
         global-json-file: global.json
 
     - name: Version
-      run: echo "PACKAGE_VERSION=$(echo ${{ github.event.release.tag_name }} | cut -c 2-)" >> $GITHUB_ENV
+      env:
+        TAG_NAME: ${{ github.event.release.tag_name }}
+      run: echo "PACKAGE_VERSION=${TAG_NAME#v}" >> "$GITHUB_ENV"
 
     - name: Release notes
-      run: echo "${{ github.event.release.body }}" > assets/RELEASE-NOTES.txt
+      env:
+        RELEASE_BODY: ${{ github.event.release.body }}
+      run: printf '%s' "$RELEASE_BODY" > assets/RELEASE-NOTES.txt
 
     - name: Restore
       run: dotnet restore ${{ env.ProjectsToPack }}
@@ -52,7 +63,7 @@ jobs:
       run: dotnet pack ${{ env.ProjectsToPack }} --configuration Release  --no-build --include-symbols --output ${{ github.workspace }}/${{ env.PackagesSubfolder }} -p:PackageVersion=${{ env.PACKAGE_VERSION }}
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
       with:
         name: ${{ env.ArtifactName }}
         if-no-files-found: error
@@ -76,19 +87,21 @@ jobs:
 
     steps:
     - name: Download artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       with:
         name: ${{ env.ArtifactName }}
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
       with:
         global-json-file: global.json
 
     - name: Push to github
       working-directory: ${{ env.PackagesSubfolder }}
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        dotnet nuget push "*.nupkg" -k ${{ secrets.GITHUB_TOKEN }} -s ${{ env.GitHubPackageSource }} --skip-duplicate
+        dotnet nuget push "*.nupkg" -k "$NUGET_AUTH_TOKEN" -s ${{ env.GitHubPackageSource }} --skip-duplicate
  
   deploy-nuget:
     needs: build
@@ -102,16 +115,18 @@ jobs:
 
     steps:
     - name: Download artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       with:
         name: ${{ env.ArtifactName }}
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
       with:
         global-json-file: global.json
 
     - name: Push to nuget.org
       working-directory: ${{ env.PackagesSubfolder }}
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
       run: |
-        dotnet nuget push "*.nupkg" -k ${{ secrets.NUGET_API_KEY }} -s ${{ env.NuGetOrgPackageSource }} --skip-duplicate
+        dotnet nuget push "*.nupkg" -k "$NUGET_API_KEY" -s ${{ env.NuGetOrgPackageSource }} --skip-duplicate
