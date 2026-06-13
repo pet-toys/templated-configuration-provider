@@ -23,9 +23,9 @@ public sealed class TemplatedConfigurationOptionsValidationTest
     }
 
     [Theory]
-    [InlineData(':', '}')]
-    [InlineData('{', ':')]
-    public void AddTemplatedConfiguration_KeyDelimiterCharacter_Throws(char start, char end)
+    [InlineData(':', '}', "TemplateCharacterStart")]
+    [InlineData('{', ':', "TemplateCharacterEnd")]
+    public void AddTemplatedConfiguration_KeyDelimiterCharacter_Throws(char start, char end, string expectedParameter)
     {
         var act = () => new ConfigurationBuilder()
             .AddTemplatedConfiguration(opt =>
@@ -35,15 +35,16 @@ public sealed class TemplatedConfigurationOptionsValidationTest
             });
 
         act.Should().Throw<ArgumentException>()
-            .WithMessage("*key delimiter*");
+            .WithMessage("*key delimiter*")
+            .WithParameterName(expectedParameter);
     }
 
     [Theory]
-    [InlineData(' ', '}')]
-    [InlineData('{', '\t')]
-    [InlineData('\n', '}')]
-    [InlineData('\0', '}')]
-    public void AddTemplatedConfiguration_WhitespaceOrControlCharacter_Throws(char start, char end)
+    [InlineData(' ', '}', "TemplateCharacterStart")]
+    [InlineData('{', '\t', "TemplateCharacterEnd")]
+    [InlineData('\n', '}', "TemplateCharacterStart")]
+    [InlineData('\0', '}', "TemplateCharacterStart")]
+    public void AddTemplatedConfiguration_WhitespaceOrControlCharacter_Throws(char start, char end, string expectedParameter)
     {
         var act = () => new ConfigurationBuilder()
             .AddTemplatedConfiguration(opt =>
@@ -52,7 +53,9 @@ public sealed class TemplatedConfigurationOptionsValidationTest
                 opt.TemplateCharacterEnd = end;
             });
 
-        act.Should().Throw<ArgumentException>();
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("*whitespace or control*")
+            .WithParameterName(expectedParameter);
     }
 
     [Fact]

@@ -18,6 +18,9 @@ internal sealed class TriggerableConfigurationSource(IDictionary<string, string?
     /// <summary>Changes a value and fires a reload notification.</summary>
     public void SetValue(string key, string? value) => _provider?.SetValue(key, value);
 
+    /// <summary>Removes a key and fires a reload notification.</summary>
+    public void Remove(string key) => _provider?.Remove(key);
+
     /// <summary>Changes a value without firing a reload notification.</summary>
     public void SetQuiet(string key, string? value) => _provider?.SetQuiet(key, value);
 
@@ -35,6 +38,12 @@ internal sealed class TriggerableConfigurationSource(IDictionary<string, string?
         public void SetValue(string key, string? value)
         {
             Data[key] = value;
+            OnReload();
+        }
+
+        public void Remove(string key)
+        {
+            Data.Remove(key);
             OnReload();
         }
 
