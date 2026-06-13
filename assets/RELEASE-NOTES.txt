@@ -1,0 +1,17 @@
+10.2.0
+======
+
+Fixed:
+- Reload now reflects the current state of the underlying sources: placeholders
+  that have become resolvable are added, and keys that no longer resolve are
+  removed. Previously these changes were missed on reload.
+- A reload is signaled only when a resolved value actually changes, so
+  IOptionsMonitor consumers are no longer notified for no-op reloads.
+- Reloading a source now drops keys that were removed from it instead of
+  keeping their stale values.
+- Resources are now released in the correct order when the provider is disposed.
+
+Changed:
+- AddTemplatedConfiguration now validates the configured template delimiters and
+  throws ArgumentException when the start and end characters are equal, match the
+  configuration key delimiter (':'), or are whitespace or control characters.
