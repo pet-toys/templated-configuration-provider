@@ -1,3 +1,14 @@
+10.2.1
+======
+
+Fixed:
+- Restored Source Link and deterministic builds for the published assemblies
+  and symbol package, so debuggers can step into the original sources from the
+  NuGet symbol server.
+- Corrected the formatting of the package release notes.
+
+--------------------------------------------------------------------------------
+
 10.2.0
 ======
 

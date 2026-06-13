@@ -31,6 +31,8 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     if: |
       startsWith(github.event.release.tag_name, 'v')
 
@@ -48,11 +50,6 @@ jobs:
         TAG_NAME: ${{ github.event.release.tag_name }}
       run: echo "PACKAGE_VERSION=${TAG_NAME#v}" >> "$GITHUB_ENV"
 
-    - name: Release notes
-      env:
-        RELEASE_BODY: ${{ github.event.release.body }}
-      run: printf '%s' "$RELEASE_BODY" > assets/RELEASE-NOTES.txt
-
     - name: Restore
       run: dotnet restore ${{ env.ProjectsToPack }}
 
@@ -61,6 +58,14 @@ jobs:
 
     - name: Pack
       run: dotnet pack ${{ env.ProjectsToPack }} --configuration Release  --no-build --include-symbols --output ${{ github.workspace }}/${{ env.PackagesSubfolder }} -p:PackageVersion=${{ env.PACKAGE_VERSION }}
+
+    - name: Sync release notes to the GitHub release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG_NAME: ${{ github.event.release.tag_name }}
+      run: |
+        dotnet msbuild ${{ env.ProjectsToPack }} --target:ExportPackageReleaseNotes -p:ReleaseNotesExportPath="${{ runner.temp }}/release-notes.txt"
+        gh release edit "$TAG_NAME" --notes-file "${{ runner.temp }}/release-notes.txt"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

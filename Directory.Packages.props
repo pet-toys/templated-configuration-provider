@@ -14,7 +14,9 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(FrameworkExtVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.300" />
+    <!-- Source Link is bundled in the .NET 8+ SDK; referencing the package
+         explicitly suppresses the SDK's Source Link / deterministic source
+         path target chain (no Source Link, non-deterministic PDB paths). -->
     <GlobalPackageReference Include="Roslynator.Analyzers" Version="$(RoslinatorVersion)" />
     <GlobalPackageReference Include="Roslynator.CodeAnalysis.Analyzers" Version="$(RoslinatorVersion)" />
     <GlobalPackageReference Include="Roslynator.CodeFixes" Version="$(RoslinatorVersion)" />
