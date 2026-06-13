@@ -36,7 +36,6 @@ public sealed class TemplatedConfigurationProviderTest
         ["RelativeReference6:OpenIdConnectOptions:Authority:TenantId"] = "F8E5CAF8-325E-4975-8A5A-C0494B5FCACB",
 
         ["AbsoluteReference3:TwoValues"] = "qwe{Replacements:EmptyValue}asd{Replacements:Value}zxc",
-        ["AbsoluteReference4:TwoValues"] = "qwe|Replacements:EmptyValue|as|d|Replacements:Value|zxc",
 
         ["Replacements:NullValue"] = null,
         ["Replacements:EmptyValue"] = string.Empty,
@@ -50,7 +49,6 @@ public sealed class TemplatedConfigurationProviderTest
         ["Replacements:DifficultSituation3"] = "{}}{{}{{{{{}Lorem}}{{}{ipsum}}}}{{}}{}}}}{{{Value}{{dolor}}{{}}{}sit{{}{{{}",
 
         ["Replacements:DifficultSituation4"] = "|||]]]}]]]]]|||||]]|[[[][][||]Replacements:Value|[]}}}}[{}}}[]}",
-        ["Replacements:DifficultSituation5"] = "{L|(o)re^*m|Replacements:Value| gt)({[]][} ipsum dolor sit",
     };
 
     private readonly IConfigurationRoot _configuration = new ConfigurationBuilder()
@@ -63,15 +61,6 @@ public sealed class TemplatedConfigurationProviderTest
         .AddTemplatedConfiguration(opt =>
         {
             opt.TemplateCharacterStart = ']';
-            opt.TemplateCharacterEnd = '|';
-        })
-        .Build();
-
-    private readonly IConfigurationRoot _configurationWithOptionsModificator2 = new ConfigurationBuilder()
-        .AddInMemoryCollection(MemoryData)
-        .AddTemplatedConfiguration(opt =>
-        {
-            opt.TemplateCharacterStart = '|';
             opt.TemplateCharacterEnd = '|';
         })
         .Build();
@@ -134,15 +123,6 @@ public sealed class TemplatedConfigurationProviderTest
     public void TemplatedConfiguration_OptionsModificator1(string key, string expected)
     {
         var value = _configurationWithOptionsModificator1.GetValue<string>(key);
-        value.Should().Be(expected);
-    }
-
-    [Theory]
-    [InlineData("Replacements:DifficultSituation5", "{L|(o)re^*mPJVr[6}Zr{yBz}GQ2U6Fj0My gt)({[]][} ipsum dolor sit")]
-    [InlineData("AbsoluteReference4:TwoValues", "qweas|dPJVr[6}Zr{yBz}GQ2U6Fj0Myzxc")]
-    public void TemplatedConfiguration_OptionsModificator2(string key, string expected)
-    {
-        var value = _configurationWithOptionsModificator2.GetValue<string>(key);
         value.Should().Be(expected);
     }
 }

@@ -18,6 +18,7 @@ public static class ConfigurationBuilderExtensions
     {
         var options = new TemplatedConfigurationOptions();
         optionBuilder?.Invoke(options);
+        options.Validate();
 
         return builder.Add(new TemplatedConfigurationSource(options));
     }
