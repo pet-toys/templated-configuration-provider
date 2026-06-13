@@ -31,35 +31,43 @@ internal sealed class TemplatedConfigurationProvider
 
     public override void Load()
     {
-        Data = new Dictionary<string, string?>(GetInnerData(), StringComparer.OrdinalIgnoreCase);
+        Data = BuildTemplatedData();
     }
 
     private void Reload()
     {
-        var changed = false;
-        var ownData = new Dictionary<string, string?>(GetInnerData(), StringComparer.OrdinalIgnoreCase);
-        var deleted = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var (key, oldValue) in Data)
+        var newData = BuildTemplatedData();
+        if (DataEquals(Data, newData))
         {
-            if (ownData.TryGetValue(key, out var value))
+            return;
+        }
+
+        Data = newData;
+        OnReload();
+    }
+
+    private Dictionary<string, string?> BuildTemplatedData()
+        => new(GetInnerData(), StringComparer.OrdinalIgnoreCase);
+
+    private static bool DataEquals(
+        IDictionary<string, string?> current,
+        Dictionary<string, string?> candidate)
+    {
+        if (current.Count != candidate.Count)
+        {
+            return false;
+        }
+
+        foreach (var (key, value) in candidate)
+        {
+            if (!current.TryGetValue(key, out var existing)
+                || !string.Equals(existing, value, StringComparison.Ordinal))
             {
-                if (value == oldValue) continue;
-                Data[key] = value;
-                changed = true;
-                continue;
+                return false;
             }
-
-            deleted.Add(key);
-            changed = true;
         }
 
-        foreach (var key in deleted)
-        {
-            Data.Remove(key);
-        }
-
-        if (changed) OnReload();
+        return true;
     }
 
     private IEnumerable<KeyValuePair<string, string?>> GetInnerData()
