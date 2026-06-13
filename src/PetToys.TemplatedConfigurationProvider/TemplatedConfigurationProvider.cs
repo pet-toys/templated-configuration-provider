@@ -15,6 +15,7 @@ internal sealed class TemplatedConfigurationProvider
     private readonly char _endChar;
     private readonly ConfigurationRoot _root;
     private readonly IDisposable _changeTokenRegistration;
+    private bool _disposed;
 
     public TemplatedConfigurationProvider(TemplatedConfigurationOptions options, IConfigurationBuilder builder)
     {
@@ -30,10 +31,7 @@ internal sealed class TemplatedConfigurationProvider
 
     public override void Load()
     {
-        foreach (var (key, value) in GetInnerData())
-        {
-            Data[key] = value;
-        }
+        Data = new Dictionary<string, string?>(GetInnerData(), StringComparer.OrdinalIgnoreCase);
     }
 
     private void Reload()
@@ -161,7 +159,10 @@ internal sealed class TemplatedConfigurationProvider
 
     public void Dispose()
     {
-        _root.Dispose();
+        if (_disposed) return;
+        _disposed = true;
+
         _changeTokenRegistration.Dispose();
+        _root.Dispose();
     }
 }
