@@ -67,6 +67,25 @@ public sealed class TemplatedConfigurationProviderReloadSemanticsTest
     }
 
     [Fact]
+    public void Reload_StrictModePlaceholderKeyRemoved_KeepsPreviousDataAndDoesNotSignal()
+    {
+        using var harness = new TemplatedProviderHarness(
+            new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Svc:Url"] = "https://{Svc:Tenant}.example.com",
+                ["Svc:Tenant"] = "acme",
+            },
+            opt => opt.ThrowOnUnresolvedPlaceholders = true);
+        var token = harness.Provider.GetReloadToken();
+
+        harness.Source.Remove("Svc:Tenant");
+
+        token.HasChanged.Should().BeFalse();
+        harness.Provider.TryGet("Svc:Url", out var value).Should().BeTrue();
+        value.Should().Be("https://acme.example.com");
+    }
+
+    [Fact]
     public void Reload_NoTemplatedChange_DoesNotSignal()
     {
         using var harness = new TemplatedProviderHarness(new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)

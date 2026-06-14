@@ -38,7 +38,16 @@ internal sealed class TemplatedConfigurationProvider
 
     private void Reload()
     {
-        var newData = BuildTemplatedData();
+        Dictionary<string, string?> newData;
+        try
+        {
+            newData = BuildTemplatedData();
+        }
+        catch (InvalidOperationException) when (_throwOnUnresolvedPlaceholders)
+        {
+            return;
+        }
+
         if (DataEquals(Data, newData))
         {
             return;
