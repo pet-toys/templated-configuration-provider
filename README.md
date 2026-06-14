@@ -194,9 +194,9 @@ not woken up for no-op reloads.
 - **Substitution is single-pass.** Placeholders are expanded against the *raw*
   source values, not recursively. If a referenced value itself contains a
   placeholder, it is inserted verbatim rather than expanded again.
-- **Unresolved placeholders pass through untouched by default.** A placeholder
-  whose key cannot be resolved (or an unbalanced delimiter) is left in the
-  value as-is unless strict mode is enabled.
+- **Unresolved placeholders pass through untouched by default.** A balanced
+  placeholder whose key cannot be resolved is left in the value as-is unless
+  strict mode is enabled. Unbalanced delimiters are always left unchanged.
 - **Order matters.** The provider overrides values from the sources registered
   before it. Place it after those sources, and after it any source that should
   win over the templated result (such as command-line arguments).
