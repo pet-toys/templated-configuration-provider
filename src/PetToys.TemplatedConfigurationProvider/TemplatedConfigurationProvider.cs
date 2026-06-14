@@ -13,6 +13,7 @@ internal sealed class TemplatedConfigurationProvider
 {
     private readonly char _startChar;
     private readonly char _endChar;
+    private readonly bool _throwOnUnresolvedPlaceholders;
     private readonly ConfigurationRoot _root;
     private readonly IDisposable _changeTokenRegistration;
     private bool _disposed;
@@ -21,6 +22,7 @@ internal sealed class TemplatedConfigurationProvider
     {
         _startChar = options.TemplateCharacterStart;
         _endChar = options.TemplateCharacterEnd;
+        _throwOnUnresolvedPlaceholders = options.ThrowOnUnresolvedPlaceholders;
         var otherProviders = builder.Sources
             .Where(s => s.GetType() != typeof(TemplatedConfigurationSource))
             .Select(source => source.Build(builder))
@@ -109,6 +111,7 @@ internal sealed class TemplatedConfigurationProvider
             var keyStart = start + 1;
             var searchFrom = keyStart;
             var matched = false;
+            string? unresolvedKey = null;
 
             while (true)
             {
@@ -116,6 +119,7 @@ internal sealed class TemplatedConfigurationProvider
                 if (end == -1) break;
 
                 var key = value[keyStart..end];
+                unresolvedKey ??= key;
                 if (TryGetReplacement(data, originalKey, key, out var rep))
                 {
                     sb.Append(value, i, start - i);
@@ -130,6 +134,12 @@ internal sealed class TemplatedConfigurationProvider
             }
 
             if (matched) continue;
+
+            if (_throwOnUnresolvedPlaceholders && unresolvedKey is not null)
+            {
+                throw new InvalidOperationException(
+                    $"Configuration key '{originalKey}' contains unresolved placeholder '{unresolvedKey}'.");
+            }
 
             sb.Append(value, i, start - i);
             sb.Append(_startChar);

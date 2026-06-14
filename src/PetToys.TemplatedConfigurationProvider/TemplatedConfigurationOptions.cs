@@ -19,6 +19,12 @@ public sealed class TemplatedConfigurationOptions
     public char TemplateCharacterEnd { get; set; } = '}';
 
     /// <summary>
+    /// Gets or sets a value indicating whether unresolved placeholders should
+    /// throw during configuration loading instead of passing through unchanged.
+    /// </summary>
+    public bool ThrowOnUnresolvedPlaceholders { get; set; }
+
+    /// <summary>
     /// Validates the configured delimiter characters, throwing
     /// <see cref="ArgumentException"/> for combinations the parser cannot handle.
     /// </summary>

@@ -169,6 +169,18 @@ The start and end characters must differ, must not be the configuration key
 delimiter (`:`), and must not be whitespace or control characters; otherwise
 `AddTemplatedConfiguration` throws an `ArgumentException`.
 
+### Strict mode
+
+By default unresolved placeholders are left untouched. To fail fast when a
+balanced placeholder cannot be resolved, enable strict mode:
+
+```csharp
+builder.Configuration.AddTemplatedConfiguration(opt =>
+{
+    opt.ThrowOnUnresolvedPlaceholders = true;
+});
+```
+
 ### Reload support
 
 When the provider sits on top of a reloadable source (for example a JSON file
@@ -182,8 +194,9 @@ not woken up for no-op reloads.
 - **Substitution is single-pass.** Placeholders are expanded against the *raw*
   source values, not recursively. If a referenced value itself contains a
   placeholder, it is inserted verbatim rather than expanded again.
-- **Unresolved placeholders pass through untouched.** A placeholder whose key
-  cannot be resolved (or an unbalanced delimiter) is left in the value as-is.
+- **Unresolved placeholders pass through untouched by default.** A placeholder
+  whose key cannot be resolved (or an unbalanced delimiter) is left in the
+  value as-is unless strict mode is enabled.
 - **Order matters.** The provider overrides values from the sources registered
   before it. Place it after those sources, and after it any source that should
   win over the templated result (such as command-line arguments).
