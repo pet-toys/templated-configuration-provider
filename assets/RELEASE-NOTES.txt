@@ -1,3 +1,17 @@
+10.2.3
+======
+
+Fixed:
+- Placeholder resolution now reads only the configuration sources registered
+  before AddTemplatedConfiguration(). Previously the provider also resolved
+  against sources added after it (for example command-line arguments), so a
+  later source could silently feed a placeholder even though it is meant to win
+  over the templated result rather than supply it. Such a source no longer
+  satisfies a placeholder; the value is left verbatim. The documented "register
+  it after the sources it reads" arrangement is unaffected.
+
+--------------------------------------------------------------------------------
+
 10.2.2
 ======
 

@@ -25,7 +25,10 @@ internal sealed class TemplatedProviderHarness : IDisposable
         var builder = new ConfigurationBuilder();
         builder.Sources.Add(Source);
 
-        Provider = new TemplatedConfigurationProvider(options, builder);
+        var templatedSource = new TemplatedConfigurationSource(options);
+        builder.Sources.Add(templatedSource);
+
+        Provider = new TemplatedConfigurationProvider(options, builder, templatedSource);
         Provider.Load();
     }
 
