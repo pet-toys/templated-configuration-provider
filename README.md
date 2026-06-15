@@ -181,6 +181,10 @@ builder.Configuration.AddTemplatedConfiguration(opt =>
 });
 ```
 
+Strict mode fails fast only during the initial load. On a later reload an
+unresolved placeholder is not thrown from the change callback; the provider
+keeps the previous resolved values and does not raise a reload notification.
+
 ### Reload support
 
 When the provider sits on top of a reloadable source (for example a JSON file

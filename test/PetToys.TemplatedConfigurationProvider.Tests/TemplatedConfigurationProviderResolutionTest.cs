@@ -100,6 +100,7 @@ public sealed class TemplatedConfigurationProviderResolutionTest : IDisposable
     [Theory]
     [InlineData("https://{Svc:Missing.example.com")]
     [InlineData("https://Svc:Missing}.example.com")]
+    [InlineData("https://}Svc:Missing{.example.com")]
     public void Resolution_StrictMode_UnbalancedDelimiter_PassesThroughVerbatim(string raw)
     {
         var config = Build(
