@@ -70,6 +70,49 @@ public sealed class TemplatedConfigurationProviderResolutionTest : IDisposable
     }
 
     [Fact]
+    public void Resolution_StrictMode_UnresolvedPlaceholder_Throws()
+    {
+        var act = () => Build(
+            new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Svc:Url"] = "https://{Svc:Missing}.example.com",
+            },
+            opt => opt.ThrowOnUnresolvedPlaceholders = true);
+
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*Svc:Url*Svc:Missing*");
+    }
+
+    [Fact]
+    public void Resolution_StrictMode_ResolvedPlaceholder_Resolves()
+    {
+        var config = Build(
+            new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Svc:Url"] = "https://{Svc:Tenant}.example.com",
+                ["Svc:Tenant"] = "acme",
+            },
+            opt => opt.ThrowOnUnresolvedPlaceholders = true);
+
+        config["Svc:Url"].Should().Be("https://acme.example.com");
+    }
+
+    [Theory]
+    [InlineData("https://{Svc:Missing.example.com")]
+    [InlineData("https://Svc:Missing}.example.com")]
+    public void Resolution_StrictMode_UnbalancedDelimiter_PassesThroughVerbatim(string raw)
+    {
+        var config = Build(
+            new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Svc:Url"] = raw,
+            },
+            opt => opt.ThrowOnUnresolvedPlaceholders = true);
+
+        config["Svc:Url"].Should().Be(raw);
+    }
+
+    [Fact]
     public void Resolution_EmptyPlaceholder_PassesThroughVerbatim()
     {
         var config = Build(new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
