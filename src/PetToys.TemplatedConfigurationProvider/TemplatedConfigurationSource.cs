@@ -8,6 +8,6 @@ internal sealed class TemplatedConfigurationSource(
 {
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
-        return new TemplatedConfigurationProvider(options, builder);
+        return new TemplatedConfigurationProvider(options, builder, this);
     }
 }

@@ -18,14 +18,18 @@ internal sealed class TemplatedConfigurationProvider
     private readonly IDisposable _changeTokenRegistration;
     private bool _disposed;
 
-    public TemplatedConfigurationProvider(TemplatedConfigurationOptions options, IConfigurationBuilder builder)
+    public TemplatedConfigurationProvider(
+        TemplatedConfigurationOptions options,
+        IConfigurationBuilder builder,
+        TemplatedConfigurationSource source)
     {
         _startChar = options.TemplateCharacterStart;
         _endChar = options.TemplateCharacterEnd;
         _throwOnUnresolvedPlaceholders = options.ThrowOnUnresolvedPlaceholders;
         var otherProviders = builder.Sources
+            .TakeWhile(s => !ReferenceEquals(s, source))
             .Where(s => s.GetType() != typeof(TemplatedConfigurationSource))
-            .Select(source => source.Build(builder))
+            .Select(s => s.Build(builder))
             .ToList();
         _root = new ConfigurationRoot(otherProviders);
         _changeTokenRegistration = ChangeToken.OnChange(_root.GetReloadToken, Reload);
