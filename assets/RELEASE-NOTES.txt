@@ -1,3 +1,18 @@
+10.2.2
+======
+
+Added:
+- Opt-in strict mode for unresolved placeholders. Set
+  TemplatedConfigurationOptions.ThrowOnUnresolvedPlaceholders to true to fail
+  fast when a balanced placeholder cannot be resolved: the initial load throws
+  InvalidOperationException naming the configuration key and the unresolved
+  placeholder. The default remains lenient pass-through, and an unbalanced
+  delimiter is always left unchanged. On a later reload an unresolved
+  placeholder does not throw; the provider keeps the previous values and does
+  not signal a reload.
+
+--------------------------------------------------------------------------------
+
 10.2.1
 ======
 
