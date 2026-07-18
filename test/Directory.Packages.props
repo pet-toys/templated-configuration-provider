@@ -11,6 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="xunit.runner.visualstudio" Version="[3.1.5,)" />
-    <GlobalPackageReference Include="coverlet.collector" Version="10.0.1" />
+    <GlobalPackageReference Include="coverlet.collector" Version="[10.0.1,)" />
   </ItemGroup>
 </Project>
