@@ -2,7 +2,6 @@
   <PropertyGroup>
     <Authors>andbaz</Authors>
     <Copyright>Copyright © 2023 - $([System.DateTime]::UtcNow.ToString(`yyyy`)) $(Authors). All rights reserved.</Copyright>
-    <Description>Configuration provider. Used to transform existing configuration values by pattern.</Description>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -30,7 +29,6 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/pet-toys/templated-configuration-provider.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/pet-toys/templated-configuration-provider</PackageProjectUrl>
-    <PackageTags>configuration;providers;transformation;templated;configuration-provider;microsoft-extensions-configuration;aspnetcore;templating;interpolation;placeholder;appsettings;pattern</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>

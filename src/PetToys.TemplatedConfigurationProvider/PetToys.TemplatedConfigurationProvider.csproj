@@ -9,6 +9,8 @@
   </ItemGroup>
 
   <PropertyGroup Label="NuGet package">
+    <Description>An IConfigurationProvider for .NET that expands {placeholder} references between configuration keys — keep secrets in environment variables, user secrets, or a key vault and template them into appsettings.json at runtime.</Description>
+    <PackageTags>configuration;providers;transformation;templated;configuration-provider;microsoft-extensions-configuration;aspnetcore;templating;interpolation;placeholder;appsettings;pattern</PackageTags>
     <PackageReleaseNotes>(Please write the package release notes in "RELEASE-NOTES.txt".)</PackageReleaseNotes>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
