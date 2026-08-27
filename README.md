@@ -36,8 +36,8 @@ unchanged.
 ## Features
 
 - **Absolute references** to any configuration key.
-- **Relative references** resolved against the value's own section and its
-  parent sections, falling back to the root.
+- **Relative references** resolved against the root first, then against each
+  section of the value's own key — the first match wins.
 - **Multiple placeholders** within a single value.
 - **Inline default values** — `{Db:Host:-localhost}` falls back to a literal
   when the key supplies nothing (opt-in).
