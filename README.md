@@ -112,9 +112,10 @@ Host=db;Database=app;Username=app;Password=Pg$Secr3t;
 ### Relative references
 
 A placeholder without the full path is resolved relative to the key it lives in:
-the provider looks in the value's own section first, then walks up the parent
-sections, and finally tries the root (which makes it an absolute reference). This
-keeps templates short and refactor-friendly.
+the provider tries the root first, then prefixes the placeholder with each
+section of the value's own key in turn — from the outermost section down to the
+value's own — and takes the first match. This keeps templates short and
+refactor-friendly.
 
 ```json
 {
@@ -135,6 +136,11 @@ https://login.example.com/5A796309-2459-45E2-9255-FB328599839B/v2.0/
 References are scoped to the section hierarchy, so a same-named key under a
 *different* section will not satisfy the reference — the placeholder is left
 untouched instead.
+
+Because the root is tried first, a root-level key of the same name **wins** over
+a nearer, section-scoped one. If both `TenantId` and `Auth:Authority:TenantId`
+exist, `{TenantId}` in `Auth:Authority` resolves to the root value. Use the full
+path when you need the nearer key regardless of what sits at the root.
 
 ### Multiple placeholders
 
@@ -253,6 +259,21 @@ not woken up for no-op reloads.
   win over the templated result (such as command-line arguments).
 
 More runnable examples live in the [unit tests][tests-url].
+
+## Limitations
+
+- **Every source it reads is built a second time.** To resolve placeholders the
+  provider assembles its own configuration root from the sources registered
+  before it, so those sources are built twice for the lifetime of the
+  application: once by the outer root and once inside the provider. For a JSON
+  file with `reloadOnChange: true` that means a second file watcher, and for a
+  source with side effects — a remote store, a secrets vault — it means the
+  fetch happens twice.
+- **Two templated providers do not compose.** When it builds its inner root the
+  provider skips every `TemplatedConfigurationSource`, its own included, so a
+  second templated provider cannot see the values a first one resolved.
+  Registering more than one gives you two independent providers over the same
+  untemplated sources, not a chain.
 
 ## License
 

@@ -298,7 +298,15 @@ internal sealed class TemplatedConfigurationProvider
         if (_disposed) return;
         _disposed = true;
 
-        _changeTokenRegistration.Dispose();
-        _root.Dispose();
+        // The inner root owns the providers this one built, so it is released
+        // even when unsubscribing fails.
+        try
+        {
+            _changeTokenRegistration.Dispose();
+        }
+        finally
+        {
+            _root.Dispose();
+        }
     }
 }

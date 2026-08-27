@@ -42,6 +42,19 @@
     </PropertyGroup>
   </Target>
 
+  <!-- A published package must carry real notes, so pack fails rather than ship
+       the placeholder or an empty section. Build is unaffected: GenerateNuspec
+       only runs when a package is produced. -->
+  <Target Name="ValidatePackageReleaseNotes" BeforeTargets="GenerateNuspec"
+          DependsOnTargets="PreparePackageReleaseNotesFromFile">
+    <Error Condition="'$(PackageReleaseNotes)' == ''"
+           Code="PT0001"
+           Text="The top section of '$(ReleaseNotesFile)' is empty. Describe this release at the top of the file (newest version first, sections separated by a line of 3+ hyphens) before packing." />
+    <Error Condition="$(PackageReleaseNotes.Contains('Please write the package release notes'))"
+           Code="PT0001"
+           Text="The package release notes are still the placeholder, so '$(ReleaseNotesFile)' was not read or has no usable top section. Describe this release at the top of that file before packing." />
+  </Target>
+
   <!-- CI reuses the same notes to set the GitHub release body:
        dotnet msbuild ... -t:ExportPackageReleaseNotes -p:ReleaseNotesExportPath=<file> -->
   <Target Name="ExportPackageReleaseNotes" DependsOnTargets="PreparePackageReleaseNotesFromFile"

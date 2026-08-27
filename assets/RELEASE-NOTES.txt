@@ -16,6 +16,11 @@ Added:
   ThrowOnUnresolvedPlaceholders. The separator is unset by default, which
   leaves placeholder parsing exactly as it was.
 
+Fixed:
+- Disposing the provider now releases the configuration root it built even
+  when unsubscribing from the underlying reload token throws, so the sources
+  it opened are no longer leaked on that path.
+
 --------------------------------------------------------------------------------
 
 10.2.4
