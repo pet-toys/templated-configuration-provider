@@ -2,7 +2,7 @@
 
 [![Unit Test][test-badge]][test-url] [![NuGet Version][nuget-v-badge]][nuget-url] [![NuGet Downloads][nuget-dt-badge]][nuget-url] [![Target frameworks][dotnet-badge]][nuget-url] [![License][license-badge]][license-url]
 
-> Keep secrets and environment-specific values out of your config files —
+> Keep secrets and environment-specific values out of your config files -
 > reference them with simple `{placeholders}` and let the provider stitch the
 > final values together at runtime.
 
@@ -29,20 +29,20 @@ This provider lets you keep a single source of truth and reference it everywhere
 - **Stay environment-agnostic.** Ship one templated `appsettings.json` and let
   each environment supply the raw values.
 
-It plugs into the standard configuration pipeline, so everything downstream —
-`IConfiguration`, the options pattern, and `IOptionsMonitor<T>` — keeps working
+It plugs into the standard configuration pipeline, so everything downstream -
+`IConfiguration`, the options pattern, and `IOptionsMonitor<T>` - keeps working
 unchanged.
 
 ## Features
 
 - **Absolute references** to any configuration key.
 - **Relative references** resolved against the root first, then against each
-  section of the value's own key — the first match wins.
+  section of the value's own key - the first match wins.
 - **Multiple placeholders** within a single value.
-- **Inline default values** — `{Db:Host:-localhost}` falls back to a literal
+- **Inline default values** - `{Db:Host:-localhost}` falls back to a literal
   when the key supplies nothing (opt-in).
 - **Custom delimiters** when the default `{ }` collides with your values.
-- **Reload support** — re-templates when an underlying source changes
+- **Reload support** - re-templates when an underlying source changes
   (`reloadOnChange` files, `IOptionsMonitor<T>`) and only signals a reload when
   a resolved value actually changes.
 - **Case-insensitive** key matching (`OrdinalIgnoreCase`).
@@ -113,8 +113,8 @@ Host=db;Database=app;Username=app;Password=Pg$Secr3t;
 
 A placeholder without the full path is resolved relative to the key it lives in:
 the provider tries the root first, then prefixes the placeholder with each
-section of the value's own key in turn — from the outermost section down to the
-value's own — and takes the first match. This keeps templates short and
+section of the value's own key in turn - from the outermost section down to the
+value's own - and takes the first match. This keeps templates short and
 refactor-friendly.
 
 ```json
@@ -134,7 +134,7 @@ https://login.example.com/5A796309-2459-45E2-9255-FB328599839B/v2.0/
 ```
 
 References are scoped to the section hierarchy, so a same-named key under a
-*different* section will not satisfy the reference — the placeholder is left
+*different* section will not satisfy the reference - the placeholder is left
 untouched instead.
 
 Because the root is tried first, a root-level key of the same name **wins** over
@@ -181,7 +181,7 @@ delimiter (`:`), and must not be whitespace or control characters; otherwise
 
 A placeholder can carry its own fallback, so an optional key does not have to
 exist in every environment. The syntax is off until you name the separator that
-splits the key from the default — `":-"` is the conventional choice:
+splits the key from the default - `":-"` is the conventional choice:
 
 ```csharp
 builder.Configuration.AddTemplatedConfiguration(opt =>
@@ -203,7 +203,7 @@ With no `Db:Host` in the configuration, `Db:Connection` resolves to
 
 - The **first** occurrence of the separator splits the placeholder, so the
   default itself may contain the separator.
-- The default is used when the key resolves to **nothing** — absent, null or
+- The default is used when the key resolves to **nothing** - absent, null or
   empty. Without a default, a key that resolves to an empty string still
   substitutes an empty string; naming a default says that empty is not the
   answer you want.
@@ -267,7 +267,7 @@ More runnable examples live in the [unit tests][tests-url].
   before it, so those sources are built twice for the lifetime of the
   application: once by the outer root and once inside the provider. For a JSON
   file with `reloadOnChange: true` that means a second file watcher, and for a
-  source with side effects — a remote store, a secrets vault — it means the
+  source with side effects - a remote store, a secrets vault - it means the
   fetch happens twice.
 - **Two templated providers do not compose.** When it builds its inner root the
   provider skips every `TemplatedConfigurationSource`, its own included, so a
