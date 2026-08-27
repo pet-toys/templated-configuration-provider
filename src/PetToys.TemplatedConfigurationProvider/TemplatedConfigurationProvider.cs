@@ -186,6 +186,7 @@ internal sealed class TemplatedConfigurationProvider
     {
         var bodyStart = start + 1;
         var searchFrom = bodyStart;
+        var isShortestBody = true;
 
         while (true)
         {
@@ -197,7 +198,17 @@ internal sealed class TemplatedConfigurationProvider
                 return false;
             }
 
-            if (TryResolveBody(data, lookupPrefixes, value[bodyStart..end], out resolved))
+            var body = value[bodyStart..end];
+
+            if (isShortestBody && TryResolveWithDefault(data, lookupPrefixes, body, out resolved))
+            {
+                resumeAt = end + 1;
+                return true;
+            }
+
+            isShortestBody = false;
+
+            if (TryLookup(data, lookupPrefixes, body, out resolved))
             {
                 resumeAt = end + 1;
                 return true;
@@ -208,31 +219,37 @@ internal sealed class TemplatedConfigurationProvider
     }
 
     /// <summary>
-    /// Resolves one candidate body: everything after the first default value
-    /// separator is a literal fallback, used whenever the key before it
-    /// supplies nothing. A body carrying a separator always resolves, which is
-    /// what keeps it out of strict mode's unresolved set.
+    /// Resolves a body that carries a default: the text before the first
+    /// separator is the key, the rest is a literal fallback used whenever that
+    /// key supplies nothing. Only the shortest body is eligible, because a
+    /// default cannot span an end delimiter -- otherwise a separator in a later
+    /// placeholder would let the longer-body retry annex an earlier unresolved
+    /// one. A body that does carry a default always resolves, which is what
+    /// keeps it out of strict mode's unresolved set.
     /// </summary>
-    private bool TryResolveBody(
+    private bool TryResolveWithDefault(
         IReadOnlyDictionary<string, string?> data,
         List<string> lookupPrefixes,
         string body,
         [MaybeNullWhen(false)] out string resolved)
     {
-        if (_defaultValueSeparator is { } separator)
+        resolved = null;
+
+        if (_defaultValueSeparator is not { } separator)
         {
-            var split = body.IndexOf(separator, StringComparison.Ordinal);
-            if (split >= 0)
-            {
-                resolved = TryLookup(data, lookupPrefixes, body[..split], out var found)
-                    && found.Length > 0
-                        ? found
-                        : body[(split + separator.Length)..];
-                return true;
-            }
+            return false;
         }
 
-        return TryLookup(data, lookupPrefixes, body, out resolved);
+        var split = body.IndexOf(separator, StringComparison.Ordinal);
+        if (split < 0)
+        {
+            return false;
+        }
+
+        resolved = TryLookup(data, lookupPrefixes, body[..split], out var found) && found.Length > 0
+            ? found
+            : body[(split + separator.Length)..];
+        return true;
     }
 
     /// <summary>

@@ -34,8 +34,9 @@ public sealed class TemplatedConfigurationOptions
     public string? DefaultValueSeparator { get; set; }
 
     /// <summary>
-    /// Validates the configured delimiter characters, throwing
-    /// <see cref="ArgumentException"/> for combinations the parser cannot handle.
+    /// Validates the configured delimiter characters and the default value
+    /// separator, throwing <see cref="ArgumentException"/> for combinations the
+    /// parser cannot handle.
     /// </summary>
     internal void Validate()
     {

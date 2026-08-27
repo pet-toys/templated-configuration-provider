@@ -93,6 +93,21 @@ public sealed class TemplatedConfigurationProviderDefaultValueTest : IDisposable
     }
 
     [Fact]
+    public void Default_PrecedingUnresolvedPlaceholder_IsNotSwallowed()
+    {
+        // The scan retries longer bodies so that a key may contain the end
+        // delimiter. A default must not ride on that retry, or the separator in
+        // a later placeholder would turn everything from the first delimiter
+        // onwards into one giant key with a fallback.
+        var config = BuildWithSeparator(new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Svc:Url"] = "{Env:Region}-{Db:Host:-localhost}",
+        });
+
+        config["Svc:Url"].Should().Be("{Env:Region}-localhost");
+    }
+
+    [Fact]
     public void Default_KeyPart_StillUsesHierarchicalLookup()
     {
         var config = BuildWithSeparator(new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
