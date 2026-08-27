@@ -20,7 +20,7 @@ public sealed class TemplatedConfigurationProviderResolutionTest : IDisposable
     public void Resolution_TransitiveReference_ResolvesOnlyOneLevel()
     {
         // A placeholder is replaced with the referenced key's RAW source value,
-        // not its templated value — substitution is single-pass.
+        // not its templated value - substitution is single-pass.
         var config = Build(new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
         {
             ["Chain:A"] = "{Chain:B}",
@@ -142,7 +142,7 @@ public sealed class TemplatedConfigurationProviderResolutionTest : IDisposable
     public void Resolution_RootAndSectionKeyCollide_PrefersRootValue()
     {
         // The lookup starts at the root and walks toward the value's own
-        // section, returning the first match — so a root-level key wins over a
+        // section, returning the first match - so a root-level key wins over a
         // nearer, section-scoped one.
         var config = Build(new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
         {
