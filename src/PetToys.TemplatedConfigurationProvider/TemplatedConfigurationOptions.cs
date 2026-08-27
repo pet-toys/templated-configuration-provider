@@ -25,8 +25,18 @@ public sealed class TemplatedConfigurationOptions
     public bool ThrowOnUnresolvedPlaceholders { get; set; }
 
     /// <summary>
-    /// Validates the configured delimiter characters, throwing
-    /// <see cref="ArgumentException"/> for combinations the parser cannot handle.
+    /// Gets or sets the separator that splits a placeholder into a key and an
+    /// inline default value, conventionally <c>":-"</c> so that
+    /// <c>{Db:Host:-localhost}</c> falls back to <c>localhost</c>. When
+    /// <see langword="null"/> (the default) the syntax is disabled and a
+    /// placeholder is read as a configuration key in full.
+    /// </summary>
+    public string? DefaultValueSeparator { get; set; }
+
+    /// <summary>
+    /// Validates the configured delimiter characters and the default value
+    /// separator, throwing <see cref="ArgumentException"/> for combinations the
+    /// parser cannot handle.
     /// </summary>
     internal void Validate()
     {
@@ -39,6 +49,37 @@ public sealed class TemplatedConfigurationOptions
 
         ValidateCharacter(TemplateCharacterStart, nameof(TemplateCharacterStart));
         ValidateCharacter(TemplateCharacterEnd, nameof(TemplateCharacterEnd));
+        ValidateDefaultValueSeparator();
+    }
+
+    private void ValidateDefaultValueSeparator()
+    {
+        if (DefaultValueSeparator is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(DefaultValueSeparator))
+        {
+            throw new ArgumentException(
+                $"{nameof(DefaultValueSeparator)} must not be empty or whitespace. Set it to null to disable inline default values.",
+                nameof(DefaultValueSeparator));
+        }
+
+        if (DefaultValueSeparator.Contains(TemplateCharacterStart)
+            || DefaultValueSeparator.Contains(TemplateCharacterEnd))
+        {
+            throw new ArgumentException(
+                $"{nameof(DefaultValueSeparator)} ('{DefaultValueSeparator}') must not contain a template delimiter ('{TemplateCharacterStart}' or '{TemplateCharacterEnd}').",
+                nameof(DefaultValueSeparator));
+        }
+
+        if (DefaultValueSeparator == ConfigurationPath.KeyDelimiter)
+        {
+            throw new ArgumentException(
+                $"{nameof(DefaultValueSeparator)} ('{DefaultValueSeparator}') conflicts with the configuration key delimiter ('{ConfigurationPath.KeyDelimiter}').",
+                nameof(DefaultValueSeparator));
+        }
     }
 
     private static void ValidateCharacter(char value, string propertyName)

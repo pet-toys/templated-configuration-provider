@@ -36,9 +36,11 @@ unchanged.
 ## Features
 
 - **Absolute references** to any configuration key.
-- **Relative references** resolved against the value's own section and its
-  parent sections, falling back to the root.
+- **Relative references** resolved against the root first, then against each
+  section of the value's own key — the first match wins.
 - **Multiple placeholders** within a single value.
+- **Inline default values** — `{Db:Host:-localhost}` falls back to a literal
+  when the key supplies nothing (opt-in).
 - **Custom delimiters** when the default `{ }` collides with your values.
 - **Reload support** — re-templates when an underlying source changes
   (`reloadOnChange` files, `IOptionsMonitor<T>`) and only signals a reload when
@@ -110,9 +112,10 @@ Host=db;Database=app;Username=app;Password=Pg$Secr3t;
 ### Relative references
 
 A placeholder without the full path is resolved relative to the key it lives in:
-the provider looks in the value's own section first, then walks up the parent
-sections, and finally tries the root (which makes it an absolute reference). This
-keeps templates short and refactor-friendly.
+the provider tries the root first, then prefixes the placeholder with each
+section of the value's own key in turn — from the outermost section down to the
+value's own — and takes the first match. This keeps templates short and
+refactor-friendly.
 
 ```json
 {
@@ -133,6 +136,11 @@ https://login.example.com/5A796309-2459-45E2-9255-FB328599839B/v2.0/
 References are scoped to the section hierarchy, so a same-named key under a
 *different* section will not satisfy the reference — the placeholder is left
 untouched instead.
+
+Because the root is tried first, a root-level key of the same name **wins** over
+a nearer, section-scoped one. If both `TenantId` and `Auth:Authority:TenantId`
+exist, `{TenantId}` in `Auth:Authority` resolves to the root value. Use the full
+path when you need the nearer key regardless of what sits at the root.
 
 ### Multiple placeholders
 
@@ -169,6 +177,49 @@ The start and end characters must differ, must not be the configuration key
 delimiter (`:`), and must not be whitespace or control characters; otherwise
 `AddTemplatedConfiguration` throws an `ArgumentException`.
 
+### Inline default values
+
+A placeholder can carry its own fallback, so an optional key does not have to
+exist in every environment. The syntax is off until you name the separator that
+splits the key from the default — `":-"` is the conventional choice:
+
+```csharp
+builder.Configuration.AddTemplatedConfiguration(opt =>
+{
+    opt.DefaultValueSeparator = ":-";
+});
+```
+
+```jsonc
+{
+  "Db": {
+    "Connection": "Server={Db:Host:-localhost};Database=app"
+  }
+}
+```
+
+With no `Db:Host` in the configuration, `Db:Connection` resolves to
+`Server=localhost;Database=app`; add `Db:Host` and its value wins.
+
+- The **first** occurrence of the separator splits the placeholder, so the
+  default itself may contain the separator.
+- The default is used when the key resolves to **nothing** — absent, null or
+  empty. Without a default, a key that resolves to an empty string still
+  substitutes an empty string; naming a default says that empty is not the
+  answer you want.
+- The default is **literal text**: an empty default (`{Db:Host:-}`) erases the
+  placeholder, and delimiters inside a default are not resolved further.
+- A placeholder carrying a default always resolves, so it never trips strict
+  mode.
+- The default **cannot contain the end delimiter**, which closes the
+  placeholder. Custom delimiters are the way out.
+
+When the separator is left unset (the default), a placeholder is read as a
+configuration key in full, exactly as it was before the option existed. It must
+not be empty or whitespace, must not contain either template delimiter, and must
+not be the bare configuration key delimiter (`:`); otherwise
+`AddTemplatedConfiguration` throws an `ArgumentException`.
+
 ### Strict mode
 
 By default unresolved placeholders are left untouched. To fail fast when a
@@ -181,7 +232,8 @@ builder.Configuration.AddTemplatedConfiguration(opt =>
 });
 ```
 
-Strict mode fails fast only during the initial load. On a later reload an
+A placeholder that carries an inline default is resolved by definition and never
+throws. Strict mode fails fast only during the initial load. On a later reload an
 unresolved placeholder is not thrown from the change callback; the provider
 keeps the previous resolved values and does not raise a reload notification.
 
@@ -199,13 +251,29 @@ not woken up for no-op reloads.
   source values, not recursively. If a referenced value itself contains a
   placeholder, it is inserted verbatim rather than expanded again.
 - **Unresolved placeholders pass through untouched by default.** A balanced
-  placeholder whose key cannot be resolved is left in the value as-is unless
-  strict mode is enabled. Unbalanced delimiters are always left unchanged.
+  placeholder whose key cannot be resolved is left in the value as-is unless it
+  carries an inline default or strict mode is enabled. Unbalanced delimiters are
+  always left unchanged.
 - **Order matters.** The provider overrides values from the sources registered
   before it. Place it after those sources, and after it any source that should
   win over the templated result (such as command-line arguments).
 
 More runnable examples live in the [unit tests][tests-url].
+
+## Limitations
+
+- **Every source it reads is built a second time.** To resolve placeholders the
+  provider assembles its own configuration root from the sources registered
+  before it, so those sources are built twice for the lifetime of the
+  application: once by the outer root and once inside the provider. For a JSON
+  file with `reloadOnChange: true` that means a second file watcher, and for a
+  source with side effects — a remote store, a secrets vault — it means the
+  fetch happens twice.
+- **Two templated providers do not compose.** When it builds its inner root the
+  provider skips every `TemplatedConfigurationSource`, its own included, so a
+  second templated provider cannot see the values a first one resolved.
+  Registering more than one gives you two independent providers over the same
+  untemplated sources, not a chain.
 
 ## License
 

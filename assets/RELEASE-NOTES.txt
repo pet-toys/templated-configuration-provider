@@ -1,3 +1,28 @@
+10.3.0
+======
+
+Added:
+- Inline default values for placeholders. Set
+  TemplatedConfigurationOptions.DefaultValueSeparator (conventionally ":-") to
+  let a placeholder carry its own fallback: {Db:Host:-localhost} resolves to
+  the value of Db:Host when that key has one, and to the literal "localhost"
+  when it does not. The first occurrence of the separator splits the
+  placeholder, so a default may itself contain the separator. A default is
+  literal text: an empty default erases the placeholder, and delimiters inside
+  a default are not resolved further. The default is also used when the key
+  resolves to an empty value, whereas a placeholder without a default still
+  substitutes the empty string. A placeholder carrying a default always
+  resolves, so its value is emitted by the provider and it never trips
+  ThrowOnUnresolvedPlaceholders. The separator is unset by default, which
+  leaves placeholder parsing exactly as it was.
+
+Fixed:
+- Disposing the provider now releases the configuration root it built even
+  when unsubscribing from the underlying reload token throws, so the sources
+  it opened are no longer leaked on that path.
+
+--------------------------------------------------------------------------------
+
 10.2.4
 ======
 

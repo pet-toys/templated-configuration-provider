@@ -14,6 +14,7 @@ internal sealed class TemplatedConfigurationProvider
     private readonly char _startChar;
     private readonly char _endChar;
     private readonly bool _throwOnUnresolvedPlaceholders;
+    private readonly string? _defaultValueSeparator;
     private readonly ConfigurationRoot _root;
     private readonly IDisposable _changeTokenRegistration;
     private bool _disposed;
@@ -26,6 +27,7 @@ internal sealed class TemplatedConfigurationProvider
         _startChar = options.TemplateCharacterStart;
         _endChar = options.TemplateCharacterEnd;
         _throwOnUnresolvedPlaceholders = options.ThrowOnUnresolvedPlaceholders;
+        _defaultValueSeparator = options.DefaultValueSeparator;
         var otherProviders = builder.Sources
             .TakeWhile(s => !ReferenceEquals(s, source))
             .Where(s => s.GetType() != typeof(TemplatedConfigurationSource))
@@ -61,9 +63,32 @@ internal sealed class TemplatedConfigurationProvider
         OnReload();
     }
 
+    /// <summary>
+    /// Snapshots the sources this provider resolves against and returns the
+    /// subset of their keys whose value contains at least one placeholder that
+    /// could be replaced.
+    /// </summary>
     private Dictionary<string, string?> BuildTemplatedData()
-        => new(GetInnerData(), StringComparer.OrdinalIgnoreCase);
+    {
+        var sourceData = new Dictionary<string, string?>(
+            _root.AsEnumerable(),
+            StringComparer.OrdinalIgnoreCase);
+        var templatedData = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
 
+        foreach (var (key, value) in sourceData)
+        {
+            if (value is not null && TryReplace(sourceData, key, value, out var replacement))
+            {
+                templatedData[key] = replacement;
+            }
+        }
+
+        return templatedData;
+    }
+
+    // 'candidate' stays concrete: CA1859 rejects an interface parameter that is
+    // only ever handed a Dictionary, and 'current' cannot follow it because
+    // ConfigurationProvider.Data is typed as IDictionary.
     private static bool DataEquals(
         IDictionary<string, string?> current,
         Dictionary<string, string?> candidate)
@@ -85,107 +110,204 @@ internal sealed class TemplatedConfigurationProvider
         return true;
     }
 
-    private IEnumerable<KeyValuePair<string, string?>> GetInnerData()
+    /// <summary>
+    /// Replaces every resolvable placeholder in <paramref name="value"/>,
+    /// returning <see langword="false"/> when nothing was replaced so the
+    /// caller can leave the key to its original provider.
+    /// </summary>
+    private bool TryReplace(
+        IReadOnlyDictionary<string, string?> data,
+        string originalKey,
+        string value,
+        [MaybeNullWhen(false)] out string replacement)
     {
-        var otherData = new Dictionary<string, string?>(
-            _root.AsEnumerable(),
-            StringComparer.OrdinalIgnoreCase);
+        replacement = null;
 
-        foreach (var (key, value) in otherData.Where(kv => kv.Value is not null))
-        {
-            if (TryReplace(otherData, key, value!, out var replacement))
-            {
-                yield return new KeyValuePair<string, string?>(key, replacement);
-            }
-        }
-    }
-
-    private bool TryReplace(IDictionary<string, string?> data, string originalKey, string value, [MaybeNullWhen(false)] out string replacement)
-    {
         if (!value.Contains(_startChar) || !value.Contains(_endChar))
         {
-            replacement = null;
             return false;
         }
 
-        var sb = new StringBuilder();
-        var i = 0;
+        var lookupPrefixes = GetLookupPrefixes(originalKey);
+        var builder = new StringBuilder(value.Length);
+        var position = 0;
         var anyReplaced = false;
 
-        while (i < value.Length)
+        while (position < value.Length)
         {
-            var start = value.IndexOf(_startChar, i);
+            var start = value.IndexOf(_startChar, position);
             if (start == -1)
             {
-                sb.Append(value, i, value.Length - i);
+                builder.Append(value, position, value.Length - position);
                 break;
             }
 
-            var keyStart = start + 1;
-            var searchFrom = keyStart;
-            var matched = false;
-            string? unresolvedKey = null;
+            builder.Append(value, position, start - position);
 
-            while (true)
+            if (TryResolvePlaceholder(data, lookupPrefixes, value, start, out var resolved, out var resumeAt))
             {
-                var end = value.IndexOf(_endChar, searchFrom);
-                if (end == -1) break;
-
-                var key = value[keyStart..end];
-                unresolvedKey ??= key;
-                if (TryGetReplacement(data, originalKey, key, out var rep))
-                {
-                    sb.Append(value, i, start - i);
-                    sb.Append(rep);
-                    i = end + 1;
-                    anyReplaced = true;
-                    matched = true;
-                    break;
-                }
-
-                searchFrom = end + 1;
+                builder.Append(resolved);
+                position = resumeAt;
+                anyReplaced = true;
+                continue;
             }
 
-            if (matched) continue;
+            ThrowIfStrict(value, originalKey, start);
 
-            if (_throwOnUnresolvedPlaceholders && unresolvedKey is not null)
-            {
-                throw new InvalidOperationException(
-                    $"Configuration key '{originalKey}' contains unresolved placeholder '{unresolvedKey}'.");
-            }
-
-            sb.Append(value, i, start - i);
-            sb.Append(_startChar);
-            i = keyStart;
+            // Not a placeholder after all: emit the delimiter and keep scanning
+            // from the character after it, so a nested start delimiter still
+            // gets its own chance to resolve.
+            builder.Append(_startChar);
+            position = start + 1;
         }
 
-        if (anyReplaced)
+        if (!anyReplaced)
         {
-            replacement = sb.ToString();
-            return true;
+            return false;
         }
 
-        replacement = null;
+        replacement = builder.ToString();
+        return true;
+    }
+
+    /// <summary>
+    /// Tries every end delimiter after <paramref name="start"/> in turn,
+    /// resolving the first candidate body that names a known key; a body that
+    /// contains an end delimiter therefore still resolves when the longer
+    /// reading is the one that matches.
+    /// </summary>
+    private bool TryResolvePlaceholder(
+        IReadOnlyDictionary<string, string?> data,
+        List<string> lookupPrefixes,
+        string value,
+        int start,
+        [MaybeNullWhen(false)] out string resolved,
+        out int resumeAt)
+    {
+        var bodyStart = start + 1;
+        var searchFrom = bodyStart;
+        var isShortestBody = true;
+
+        while (true)
+        {
+            var end = value.IndexOf(_endChar, searchFrom);
+            if (end == -1)
+            {
+                resolved = null;
+                resumeAt = bodyStart;
+                return false;
+            }
+
+            var body = value[bodyStart..end];
+
+            if (isShortestBody && TryResolveWithDefault(data, lookupPrefixes, body, out resolved))
+            {
+                resumeAt = end + 1;
+                return true;
+            }
+
+            isShortestBody = false;
+
+            if (TryLookup(data, lookupPrefixes, body, out resolved))
+            {
+                resumeAt = end + 1;
+                return true;
+            }
+
+            searchFrom = end + 1;
+        }
+    }
+
+    /// <summary>
+    /// Resolves a body that carries a default: the text before the first
+    /// separator is the key, the rest is a literal fallback used whenever that
+    /// key supplies nothing. Only the shortest body is eligible, because a
+    /// default cannot span an end delimiter -- otherwise a separator in a later
+    /// placeholder would let the longer-body retry annex an earlier unresolved
+    /// one. A body that does carry a default always resolves, which is what
+    /// keeps it out of strict mode's unresolved set.
+    /// </summary>
+    private bool TryResolveWithDefault(
+        IReadOnlyDictionary<string, string?> data,
+        List<string> lookupPrefixes,
+        string body,
+        [MaybeNullWhen(false)] out string resolved)
+    {
+        resolved = null;
+
+        if (_defaultValueSeparator is not { } separator)
+        {
+            return false;
+        }
+
+        var split = body.IndexOf(separator, StringComparison.Ordinal);
+        if (split < 0)
+        {
+            return false;
+        }
+
+        resolved = TryLookup(data, lookupPrefixes, body[..split], out var found) && found.Length > 0
+            ? found
+            : body[(split + separator.Length)..];
+        return true;
+    }
+
+    /// <summary>
+    /// Resolves <paramref name="key"/> against the snapshot, trying the root
+    /// first and then each section of the value's own key, so the first match
+    /// wins.
+    /// </summary>
+    private static bool TryLookup(
+        IReadOnlyDictionary<string, string?> data,
+        List<string> lookupPrefixes,
+        string key,
+        [MaybeNullWhen(false)] out string value)
+    {
+        foreach (var prefix in lookupPrefixes)
+        {
+            if (data.TryGetValue(prefix + key, out var found))
+            {
+                value = found ?? string.Empty;
+                return true;
+            }
+        }
+
+        value = null;
         return false;
     }
 
-    private static bool TryGetReplacement(IDictionary<string, string?> data, string originalKey, string key, [MaybeNullWhen(false)] out string value)
+    /// <summary>
+    /// Builds the lookup prefixes for a key -- the empty root prefix followed
+    /// by each of its sections -- once per value instead of once per candidate.
+    /// </summary>
+    private static List<string> GetLookupPrefixes(string originalKey)
     {
-        value = null;
-        var segments = new List<string> { string.Empty };
+        var prefixes = new List<string> { string.Empty };
         foreach (var fragment in originalKey.Split(ConfigurationPath.KeyDelimiter))
         {
-            segments.Add(segments[^1] + fragment + ConfigurationPath.KeyDelimiter);
+            prefixes.Add(prefixes[^1] + fragment + ConfigurationPath.KeyDelimiter);
         }
 
-        foreach (var segment in segments)
+        return prefixes;
+    }
+
+    private void ThrowIfStrict(string value, string originalKey, int start)
+    {
+        if (!_throwOnUnresolvedPlaceholders)
         {
-            if (!data.TryGetValue(segment + key, out var val)) continue;
-            value = val ?? string.Empty;
-            return true;
+            return;
         }
 
-        return false;
+        var bodyStart = start + 1;
+        var end = value.IndexOf(_endChar, bodyStart);
+        if (end == -1)
+        {
+            // Unbalanced, not unresolved: it passes through verbatim.
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"Configuration key '{originalKey}' contains unresolved placeholder '{value[bodyStart..end]}'.");
     }
 
     public void Dispose()
@@ -193,7 +315,15 @@ internal sealed class TemplatedConfigurationProvider
         if (_disposed) return;
         _disposed = true;
 
-        _changeTokenRegistration.Dispose();
-        _root.Dispose();
+        // The inner root owns the providers this one built, so it is released
+        // even when unsubscribing fails.
+        try
+        {
+            _changeTokenRegistration.Dispose();
+        }
+        finally
+        {
+            _root.Dispose();
+        }
     }
 }
