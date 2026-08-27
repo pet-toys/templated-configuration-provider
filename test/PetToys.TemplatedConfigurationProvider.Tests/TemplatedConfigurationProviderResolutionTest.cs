@@ -139,6 +139,35 @@ public sealed class TemplatedConfigurationProviderResolutionTest : IDisposable
     }
 
     [Fact]
+    public void Resolution_RootAndSectionKeyCollide_PrefersRootValue()
+    {
+        // The lookup starts at the root and walks toward the value's own
+        // section, returning the first match — so a root-level key wins over a
+        // nearer, section-scoped one.
+        var config = Build(new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Auth:Authority"] = "https://host/{TenantId}/",
+            ["Auth:Authority:TenantId"] = "near",
+            ["TenantId"] = "root",
+        });
+
+        config["Auth:Authority"].Should().Be("https://host/root/");
+    }
+
+    [Fact]
+    public void Resolution_MultiplePlaceholders_ResolveIndependently()
+    {
+        var config = Build(new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["M:Value"] = "a{M:Empty}b{M:Filled}c",
+            ["M:Empty"] = string.Empty,
+            ["M:Filled"] = "x",
+        });
+
+        config["M:Value"].Should().Be("abxc");
+    }
+
+    [Fact]
     public void Reload_CustomDelimiters_DropsStaleKeyAfterSourceRemoval()
     {
         using var harness = new TemplatedProviderHarness(
