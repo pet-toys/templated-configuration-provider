@@ -14,6 +14,7 @@ internal sealed class TemplatedConfigurationProvider
     private readonly char _startChar;
     private readonly char _endChar;
     private readonly bool _throwOnUnresolvedPlaceholders;
+    private readonly string? _defaultValueSeparator;
     private readonly ConfigurationRoot _root;
     private readonly IDisposable _changeTokenRegistration;
     private bool _disposed;
@@ -26,6 +27,7 @@ internal sealed class TemplatedConfigurationProvider
         _startChar = options.TemplateCharacterStart;
         _endChar = options.TemplateCharacterEnd;
         _throwOnUnresolvedPlaceholders = options.ThrowOnUnresolvedPlaceholders;
+        _defaultValueSeparator = options.DefaultValueSeparator;
         var otherProviders = builder.Sources
             .TakeWhile(s => !ReferenceEquals(s, source))
             .Where(s => s.GetType() != typeof(TemplatedConfigurationSource))
@@ -195,7 +197,7 @@ internal sealed class TemplatedConfigurationProvider
                 return false;
             }
 
-            if (TryLookup(data, lookupPrefixes, value[bodyStart..end], out resolved))
+            if (TryResolveBody(data, lookupPrefixes, value[bodyStart..end], out resolved))
             {
                 resumeAt = end + 1;
                 return true;
@@ -203,6 +205,34 @@ internal sealed class TemplatedConfigurationProvider
 
             searchFrom = end + 1;
         }
+    }
+
+    /// <summary>
+    /// Resolves one candidate body: everything after the first default value
+    /// separator is a literal fallback, used whenever the key before it
+    /// supplies nothing. A body carrying a separator always resolves, which is
+    /// what keeps it out of strict mode's unresolved set.
+    /// </summary>
+    private bool TryResolveBody(
+        IReadOnlyDictionary<string, string?> data,
+        List<string> lookupPrefixes,
+        string body,
+        [MaybeNullWhen(false)] out string resolved)
+    {
+        if (_defaultValueSeparator is { } separator)
+        {
+            var split = body.IndexOf(separator, StringComparison.Ordinal);
+            if (split >= 0)
+            {
+                resolved = TryLookup(data, lookupPrefixes, body[..split], out var found)
+                    && found.Length > 0
+                        ? found
+                        : body[(split + separator.Length)..];
+                return true;
+            }
+        }
+
+        return TryLookup(data, lookupPrefixes, body, out resolved);
     }
 
     /// <summary>

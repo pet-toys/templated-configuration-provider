@@ -39,6 +39,8 @@ unchanged.
 - **Relative references** resolved against the value's own section and its
   parent sections, falling back to the root.
 - **Multiple placeholders** within a single value.
+- **Inline default values** — `{Db:Host:-localhost}` falls back to a literal
+  when the key supplies nothing (opt-in).
 - **Custom delimiters** when the default `{ }` collides with your values.
 - **Reload support** — re-templates when an underlying source changes
   (`reloadOnChange` files, `IOptionsMonitor<T>`) and only signals a reload when
@@ -169,6 +171,49 @@ The start and end characters must differ, must not be the configuration key
 delimiter (`:`), and must not be whitespace or control characters; otherwise
 `AddTemplatedConfiguration` throws an `ArgumentException`.
 
+### Inline default values
+
+A placeholder can carry its own fallback, so an optional key does not have to
+exist in every environment. The syntax is off until you name the separator that
+splits the key from the default — `":-"` is the conventional choice:
+
+```csharp
+builder.Configuration.AddTemplatedConfiguration(opt =>
+{
+    opt.DefaultValueSeparator = ":-";
+});
+```
+
+```jsonc
+{
+  "Db": {
+    "Connection": "Server={Db:Host:-localhost};Database=app"
+  }
+}
+```
+
+With no `Db:Host` in the configuration, `Db:Connection` resolves to
+`Server=localhost;Database=app`; add `Db:Host` and its value wins.
+
+- The **first** occurrence of the separator splits the placeholder, so the
+  default itself may contain the separator.
+- The default is used when the key resolves to **nothing** — absent, null or
+  empty. Without a default, a key that resolves to an empty string still
+  substitutes an empty string; naming a default says that empty is not the
+  answer you want.
+- The default is **literal text**: an empty default (`{Db:Host:-}`) erases the
+  placeholder, and delimiters inside a default are not resolved further.
+- A placeholder carrying a default always resolves, so it never trips strict
+  mode.
+- The default **cannot contain the end delimiter**, which closes the
+  placeholder. Custom delimiters are the way out.
+
+When the separator is left unset (the default), a placeholder is read as a
+configuration key in full, exactly as it was before the option existed. It must
+not be empty or whitespace, must not contain either template delimiter, and must
+not be the bare configuration key delimiter (`:`); otherwise
+`AddTemplatedConfiguration` throws an `ArgumentException`.
+
 ### Strict mode
 
 By default unresolved placeholders are left untouched. To fail fast when a
@@ -181,7 +226,8 @@ builder.Configuration.AddTemplatedConfiguration(opt =>
 });
 ```
 
-Strict mode fails fast only during the initial load. On a later reload an
+A placeholder that carries an inline default is resolved by definition and never
+throws. Strict mode fails fast only during the initial load. On a later reload an
 unresolved placeholder is not thrown from the change callback; the provider
 keeps the previous resolved values and does not raise a reload notification.
 
@@ -199,8 +245,9 @@ not woken up for no-op reloads.
   source values, not recursively. If a referenced value itself contains a
   placeholder, it is inserted verbatim rather than expanded again.
 - **Unresolved placeholders pass through untouched by default.** A balanced
-  placeholder whose key cannot be resolved is left in the value as-is unless
-  strict mode is enabled. Unbalanced delimiters are always left unchanged.
+  placeholder whose key cannot be resolved is left in the value as-is unless it
+  carries an inline default or strict mode is enabled. Unbalanced delimiters are
+  always left unchanged.
 - **Order matters.** The provider overrides values from the sources registered
   before it. Place it after those sources, and after it any source that should
   win over the templated result (such as command-line arguments).
